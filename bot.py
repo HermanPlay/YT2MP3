@@ -32,8 +32,10 @@ def echo(update, context):
         title = download(url=update.message.text)
         with open(f'{title}.mp3', 'rb') as audio:
             context.bot.send_audio(chat_id=update.effective_chat.id, audio=audio)
+        os.remove(f'{title}.mp3')
     except Exception as e:
         context.bot.send_message(chat_id=update.effective_chat.id, text='Send link, or I will not work!')
+    
     
 
 def error(update, context):
