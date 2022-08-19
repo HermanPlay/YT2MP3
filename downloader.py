@@ -6,17 +6,18 @@ def download(url: str) -> bytes:
     cwd = os.getcwd()
     print(cwd)
     yt = YouTube(url)
+    title = yt.streams[0].title
   
     video = yt.streams.filter(only_audio=True).first()
     
     # download the file
     out_file = video.download(output_path=cwd, filename='audio.mp3')
-    print(out_file)
+    print('Downloaded file, processing forward!')
     
-    with open(out_file, 'rb') as file:
-        audio = file.read()
+    new_file = title + '.mp3'
+    os.rename(out_file, new_file)
 
-    return audio
+    return title
 
 
 download('https://www.youtube.com/watch?v=0rEPcSfXQgc')

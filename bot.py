@@ -6,7 +6,7 @@ from telegram.ext import Updater
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler
 from telegram.ext import Filters
-from downlaoder import download
+from downloader import download
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -28,10 +28,13 @@ def help(update, context):
 
 def echo(update, context):
     bot = telegram.Bot(token=TOKEN)
-    text_for_image = update.message.text
-    image = imaging.draw_image(text_for_image)
-    chatid = update.message.chat_id
-    bot.send_photo(chat_id=chatid, photo=image)
+    try:
+        title = download(url=update.message.text)
+        with open(f'{title}.mp3', 'rb') as audio:
+            context.bot.send_audio(chat_id=update.effective_chat.id, audio=audio)
+    except Exception as e:
+        context.bot.send_message(chat_id=update.effective_chat.id, text='Send link, or I will not work!')
+    
 
 def error(update, context):
     """Log Errors caused by Updates."""
@@ -54,12 +57,12 @@ def main():
     dp.add_error_handler(error)
 
     # Start the Bot
-    updater.start_polling()
+    #updater.start_polling()
 
-    # updater.start_webhook(listen="0.0.0.0",
-    #                       port=int(PORT),
-    #                       url_path=TOKEN,
-    #                       webhook_url="https://kindgaulek-bot.herokuapp.com/" + TOKEN)
+    updater.start_webhook(listen="0.0.0.0",
+                          port=int(os.environ.get('PORT', 5000)),
+                          url_path=TOKEN,
+                          webhook_url="https://yt2mp3-bot.herokuapp.com/" + TOKEN)
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
