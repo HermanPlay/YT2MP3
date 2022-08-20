@@ -18,6 +18,3 @@ def download(url: str) -> bytes:
     os.rename(out_file, new_file)
 
     return title
-
-
-download('https://youtu.be/u1ZoHfJZACA')
