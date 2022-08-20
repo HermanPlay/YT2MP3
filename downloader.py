@@ -20,4 +20,4 @@ def download(url: str) -> bytes:
     return title
 
 
-download('https://www.youtube.com/watch?v=0rEPcSfXQgc')
+download('https://youtu.be/u1ZoHfJZACA')
