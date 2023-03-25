@@ -53,9 +53,9 @@ def setup():
 
 
 def main():
-    logger.info("Downloading ffmpeg")
-    setup()
-    logger.info("Downloaded ffmpeg succesfully")
+    # logger.info("Downloading ffmpeg")
+    # setup()
+    # logger.info("Downloaded ffmpeg succesfully")
 
     updater = Updater(TOKEN, use_context=True)
 

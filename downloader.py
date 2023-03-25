@@ -40,6 +40,6 @@ def download(url: str) -> str:
     new_file = title + ".mp3"
     os.rename(out_file, new_file)
 
-    fix(title)
+    # fix(title)
 
     return title
