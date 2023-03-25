@@ -1,4 +1,4 @@
 pydub==0.25.1
-python_telegram_bot==20.2
+python_telegram_bot==13.13
 pytube==12.1.2
 telegram==0.0.1
