@@ -9,41 +9,51 @@ from telegram.ext import Filters
 from downloader import download
 
 # Enable logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
 
 logger = logging.getLogger(__name__)
-PORT = int(os.environ.get('PORT', '8443'))
+PORT = int(os.environ.get("PORT", "8443"))
 ROOT = os.path.dirname(__file__)
-TOKEN = '5724767134:AAEYoGavRJU8tBXaU_3sZBuRM0GUEG2Lr3k'
+TOKEN = "5724767134:AAEYoGavRJU8tBXaU_3sZBuRM0GUEG2Lr3k"
 
 
 def start(update, context):
-    
-    update.message.reply_text('Hi! Send me link with audio, which has to be downloaded')
+
+    update.message.reply_text("Hi! Send me link with audio, which has to be downloaded")
+
 
 def help(update, context):
-    
-    update.message.reply_text('Write /start')
+
+    update.message.reply_text("Write /start")
+
 
 def echo(update, context):
-    bot = telegram.Bot(token=TOKEN)
     try:
         title = download(url=update.message.text)
-        with open(f'{title}.mp3', 'rb') as audio:
+        with open(f"{title}.mp3", "rb") as audio:
             context.bot.send_audio(chat_id=update.effective_chat.id, audio=audio)
-        os.remove(f'{title}.mp3')
+        os.remove(f"{title}.mp3")
     except Exception as e:
-        context.bot.send_message(chat_id=update.effective_chat.id, text='Send link, or I will not work!')
-    
-    
+        context.bot.send_message(
+            chat_id=update.effective_chat.id, text="Send link, or I will not work!"
+        )
+
 
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 
+def setup():
+    os.system("apt-get install ffmpeg")
+
+
 def main():
+    logger.info("Downloading ffmpeg")
+    setup()
+    logger.info("Downloaded ffmpeg succesfully")
 
     updater = Updater(TOKEN, use_context=True)
 
@@ -59,12 +69,14 @@ def main():
     dp.add_error_handler(error)
 
     # Start the Bot
-    #updater.start_polling()
+    # updater.start_polling()
 
-    updater.start_webhook(listen="0.0.0.0",
-                          port=int(os.environ.get('PORT', 5000)),
-                          url_path=TOKEN,
-                          webhook_url="https://yt2mp3-bot.herokuapp.com/" + TOKEN)
+    updater.start_webhook(
+        listen="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000)),
+        url_path=TOKEN,
+        webhook_url="https://yt2mp3-bot.herokuapp.com/" + TOKEN,
+    )
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
@@ -72,5 +84,5 @@ def main():
     updater.idle()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
