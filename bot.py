@@ -5,7 +5,7 @@ import telegram
 from telegram.ext import Updater
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler
-from telegram.ext import filters
+from telegram.ext import Filters
 from downloader import download
 
 # Enable logging
@@ -63,7 +63,7 @@ def main():
     dp.add_handler(CommandHandler("help", help))
 
     # on noncommand i.e message - echo the message on Telegram
-    dp.add_handler(MessageHandler(filters.text, echo))
+    dp.add_handler(MessageHandler(Filters.text, echo))
 
     # log all errors
     dp.add_error_handler(error)
