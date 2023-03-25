@@ -49,6 +49,7 @@ def error(update, context):
 
 def setup():
     os.system("apt-get install ffmpeg")
+    os.system("apt-get install libav-tools")
 
 
 def main():
