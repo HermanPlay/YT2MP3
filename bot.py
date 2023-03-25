@@ -47,8 +47,8 @@ def error(update, context):
 
 
 def setup():
-    os.system("sudo apt-get update")
-    os.system("sudo apt-get install ffmpeg")
+    os.system("apt update")
+    os.system("apt install ffmpeg")
 
 
 def main():
