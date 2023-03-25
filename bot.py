@@ -1,6 +1,5 @@
 import os
 import logging
-import telegram
 
 from telegram.ext import Updater
 from telegram.ext import CommandHandler
@@ -48,13 +47,13 @@ def error(update, context):
 
 
 def setup():
+    os.system("apt-get update")
     os.system("apt-get install ffmpeg")
-    os.system("apt-get install libav-tools")
 
 
 def main():
-    # logger.info("Downloading ffmpeg")
-    # setup()
+    logger.info("Downloading ffmpeg")
+    setup()
     # logger.info("Downloaded ffmpeg succesfully")
 
     updater = Updater(TOKEN, use_context=True)
