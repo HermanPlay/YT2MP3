@@ -1,25 +1,23 @@
 from pytube import YouTube
 import os
-from pydub import AudioSegment
+import time
 
 
 def fix(title: str) -> None:
 
+    print(title)
     src = title + ".mp3"
     dst = title + ".wav"
 
     # convert mp3 to wav
-    sound = AudioSegment.from_mp3(src)
-    sound.export(dst, format="wav")
+    os.system(f"ffmpeg -analyzeduration 2147483647 -probesize 2147483647 -i {src} {dst}")
 
-    os.remove(f"{title}.mp3")
+    os.remove(src)
 
     src = title + ".wav"
     dst = title + ".mp3"
 
-    # convert wav to mp3
-    sound = AudioSegment.from_file(src, format="wav")
-    sound.export(dst, format="mp3")
+    os.system(f"ffmpeg -analyzeduration 2147483647 -probesize 2147483647 -i {src} {dst}")
 
     os.remove(f"{title}.wav")
 
@@ -29,7 +27,8 @@ def download(url: str) -> str:
     cwd = os.getcwd()
     print(cwd)
     yt = YouTube(url)
-    title: str = yt.streams[0].title
+    orig_title = yt.streams[0].title
+    title = str(int(time.time()))
 
     video = yt.streams.filter(only_audio=True).first()
 
@@ -40,6 +39,10 @@ def download(url: str) -> str:
     new_file = title + ".mp3"
     os.rename(out_file, new_file)
 
-    fix(title)
+    try:
+        fix(title)
+    except Exception as e:
+        print(f"Failed converting to wav and mp3 | {e}")
 
-    return title
+    os.rename(new_file, f"{orig_title}.mp3")
+    return orig_title
