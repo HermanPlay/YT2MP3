@@ -21,6 +21,8 @@ def fix(title: str) -> None:
     sound = AudioSegment.from_file(src, format="wav")
     sound.export(dst, format="mp3")
 
+    os.remove(f"{title}.wav")
+
 
 # url input from user
 def download(url: str) -> str:
