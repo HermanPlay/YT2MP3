@@ -46,15 +46,7 @@ def error(update, context):
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 
-def setup():
-    os.system("apt update")
-    os.system("apt install ffmpeg")
-
-
 def main():
-    logger.info("Downloading ffmpeg")
-    setup()
-    # logger.info("Downloaded ffmpeg succesfully")
 
     updater = Updater(TOKEN, use_context=True)
 
