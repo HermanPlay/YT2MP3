@@ -13,9 +13,8 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
-PORT = int(os.environ.get("PORT", "8443"))
 ROOT = os.path.dirname(__file__)
-TOKEN = "5724767134:AAEYoGavRJU8tBXaU_3sZBuRM0GUEG2Lr3k"
+TOKEN = os.environ.get("TOKEN")
 
 
 def start(update, context):
