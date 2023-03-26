@@ -36,7 +36,7 @@ def echo(update, context):
     except Exception as e:
         print(e)
         context.bot.send_message(
-            chat_id=update.effective_chat.id, text="Send link, or I will not work!"
+            chat_id=update.effective_chat.id, text="Error Occured! Contact Administrator"
         )
 
 
