@@ -14,7 +14,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 ROOT = os.path.dirname(__file__)
-TOKEN = os.environ.get("TOKEN", "5724767134:AAEYoGavRJU8tBXaU_3sZBuRM0GUEG2Lr3k")
+TOKEN = os.environ.get("TOKEN")
 
 
 def start(update, context):
@@ -62,7 +62,6 @@ def main():
 
     # Start the Bot
     # updater.start_polling()
-    print(TOKEN)
     updater.start_webhook(
         listen="0.0.0.0",
         port=int(os.environ.get("PORT", 5000)),
