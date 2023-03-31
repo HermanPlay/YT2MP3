@@ -1,4 +1,4 @@
-from pytube import YouTube
+from pytube import YouTube # type: ignore 
 import os
 import time
 
@@ -31,8 +31,7 @@ def download(url: str) -> str:
     video = yt.streams.filter(only_audio=True).first()
 
     # download the file
-    out_file = video.download(output_path=cwd, filename="audio.mp3")
-    print("Downloaded file, processing forward!")
+    out_file = video.download(output_path=cwd, filename="audio.mp3") # type: ignore 
 
     new_file = title + ".mp3"
     os.rename(out_file, new_file)
