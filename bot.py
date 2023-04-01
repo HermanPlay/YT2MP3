@@ -25,6 +25,7 @@ async def start(update, context):
     await update.message.reply_text(
         "Hi! Send me link with audio, which has to be downloaded"
     )
+    # TODO: 1. Check if this is first time user uses bot, and if yes add to db
 
 
 async def help(update, context):
@@ -75,13 +76,13 @@ def main():
     application.add_error_handler(error)
 
     # Start the Bot
-    application.run_polling()
-    # application.run_webhook(
-    #     listen="0.0.0.0",
-    #     port=int(os.environ.get("PORT", 5000)),
-    #     url_path=TOKEN,
-    #     webhook_url="https://yt2mp3-bot.herokuapp.com/" + TOKEN,
-    # )
+    # application.run_polling()
+    application.run_webhook(
+        listen="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000)),
+        url_path=TOKEN,
+        webhook_url="https://yt2mp3-bot.herokuapp.com/" + TOKEN,
+    )
 
 
 if __name__ == "__main__":
