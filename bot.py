@@ -1,7 +1,5 @@
 import os
 import logging
-import sqlite3
-from sqlite3 import Error
 
 from telegram.ext import Application
 from telegram.ext import CommandHandler
@@ -17,25 +15,16 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 ROOT = os.path.dirname(__file__)
 
-async def create_connection():
-    """ create a database connection to a SQLite database """
-    conn = None
-    try:
-        conn = sqlite3.connect("db/data.db")
-        print(sqlite3.version)
-    except Error as e:
-        print(e)
-    finally:
-        if conn:
-            conn.close()
 
 async def save_to_db(update, context):
-    conn = await create_connection()
+    pass
 
 
 async def start(update, context):
 
-    await update.message.reply_text("Hi! Send me link with audio, which has to be downloaded")
+    await update.message.reply_text(
+        "Hi! Send me link with audio, which has to be downloaded"
+    )
 
 
 async def help(update, context):
@@ -53,7 +42,8 @@ async def echo(update, context):
     except Exception as e:
         print(e)
         await context.bot.send_message(
-            chat_id=update.effective_chat.id, text="Error Occured! Contact Administrator"
+            chat_id=update.effective_chat.id,
+            text="Error Occured! Contact Administrator",
         )
 
 
@@ -65,6 +55,7 @@ async def error(update, context):
 def setup():
     if not os.path.isdir("/db"):
         os.mkdir("/db")
+
 
 def main():
 
@@ -83,7 +74,7 @@ def main():
     # log all errors
     application.add_error_handler(error)
 
-    # Start the Bot     
+    # Start the Bot
     application.run_polling()
     # application.run_webhook(
     #     listen="0.0.0.0",
