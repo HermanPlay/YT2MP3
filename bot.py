@@ -62,7 +62,7 @@ def main():
 
     TOKEN = os.environ.get("TOKEN", "")
 
-    setup()
+    #setup()
 
     application = Application.builder().token(TOKEN).build()
 
