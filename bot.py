@@ -49,11 +49,7 @@ def main():
 
     updater = Updater(TOKEN, use_context=True)
 
-<<<<<<< HEAD
-    #setup()
-=======
     dp = updater.dispatcher
->>>>>>> parent of a438a2b (Merge pull request #1 from HermanPlay/develop)
 
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
