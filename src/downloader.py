@@ -4,25 +4,43 @@ import time
 
 
 def fix(title: str) -> None:
+    """
+    Function takes file name and fixes its metadata,
+    by converting to wav and back to mp3
+
+    :param title: File name
+    """
 
     src = title + ".mp3"
     dst = title + ".wav"
 
     # convert mp3 to wav
-    os.system(f"ffmpeg -loglevel quiet -analyzeduration 2147483647 -probesize 2147483647 -i {src} {dst}")
+    os.system(
+        f"ffmpeg -loglevel quiet -analyzeduration 2147483647 -probesize 2147483647 -i {src} {dst}"
+    )
 
     os.remove(src)
 
     src = title + ".wav"
     dst = title + ".mp3"
-
-    os.system(f"ffmpeg -loglevel quiet -analyzeduration 2147483647 -probesize 2147483647 -i {src} {dst}")
+    # convert wav to mp3
+    os.system(
+        f"ffmpeg -loglevel quiet -analyzeduration 2147483647 -probesize 2147483647 -i {src} {dst}"
+    )
 
     os.remove(f"{title}.wav")
 
 
 # url input from user
 def download(url: str) -> str:
+    """
+    Function takes url and downloades video.
+    It also calls fix function before return.
+
+    :param url: YouTube video url
+    :return: Name of the downloaded file
+    """
+
     cwd = os.getcwd()
     yt = YouTube(url)
     orig_title = yt.streams[0].title
