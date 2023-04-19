@@ -4,7 +4,7 @@ This Telegram bot is designed to make it easy and convenient for users to downlo
 
 ## Getting Started
 
-To use the bot, simply send a YouTube link to the bot in a private message. The bot will automatically download the audio from the video and send it to you via Telegram. You can also send a message with a playlist or album link and the bot will download all the songs from that playlist or album.
+To use the bot, simply send a YouTube link to the bot in a private message. The bot will automatically download the audio from the video and send it to you via Telegram. 
 
 ## Installation
 
@@ -14,7 +14,7 @@ To deploy the bot, follow these steps:
 2. Create a new bot on Telegram by talking to the BotFather and getting your bot token.
 3. Install the required dependencies by running `pip install -r requirements.txt`.
 4. Update the `config.py` file with your bot token and other settings as needed.
-5. Run the bot using the command `python bot.py`.
+5. Run the bot using the command `python src/bot.py`.
 
 ## Usage
 
