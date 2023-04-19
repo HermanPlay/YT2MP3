@@ -6,6 +6,38 @@ This Telegram bot is designed to make it easy and convenient for users to downlo
 
 To use the bot, simply send a YouTube link to the bot in a private message. The bot will automatically download the audio from the video and send it to you via Telegram. 
 
+## Requirements
+
+To run this app, you need to have `ffmpeg` installed on your system. 
+
+`ffmpeg` is a free and open-source software for handling multimedia data. It is commonly used for processing audio and video files and is required for this app to function properly.
+
+To install `ffmpeg`, follow the instructions for your operating system:
+
+### Windows
+
+Download the latest version of `ffmpeg` from the official website: https://ffmpeg.org/download.html#build-windows
+
+Extract the downloaded zip file to a folder on your computer, then add the `bin` folder to your system's PATH environment variable.
+
+### macOS
+
+Install `ffmpeg` using Homebrew by running the following command in your terminal:
+
+```
+brew install ffmpeg
+```
+
+### Linux
+
+Install `ffmpeg` using your distribution's package manager. For example, on Ubuntu, run the following command:
+
+```
+sudo apt-get install ffmpeg
+```
+
+Once `ffmpeg` is installed, you should be able to run the app without any issues.
+
 ## Installation
 
 To deploy the bot, follow these steps:
@@ -23,6 +55,8 @@ To use the bot, simply send a YouTube link to the bot in a private message. The 
 ## Contributing
 
 Contributions to this project are always welcome! If you find a bug or have an idea for a new feature, feel free to submit a pull request or open an issue on the GitHub repository.
+
+When contributing to this project, please make sure to follow the coding standards and use the black code formatter and flake8 linter before submitting any code changes. This will help maintain consistency, readability, and adherence to PEP8 standards throughout the codebase.
 
 ## License
 
