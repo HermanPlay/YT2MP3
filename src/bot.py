@@ -3,6 +3,7 @@ import logging
 import time
 import pytube
 from pytube import YouTube
+import os
 from keyboard import press
 
 
@@ -89,9 +90,14 @@ def login(update: Update, context: CallbackContext) -> None:
     """
     if update.effective_user.id == settings.ADMIN_ID:
         yt = YouTube("https://youtu.be/hCzkkHwR2gg", use_oauth=True, allow_oauth_cache=True)
+        cwd = os.getcwd()
+        orig_title = yt.streams[0].title
+        title = str(int(time.time()))
+        video = yt.streams.filter(only_audio=True).first()
+        out_file = video.download(output_path=cwd, filename="audio.mp3")
         context.bot.send_message(
             chat_id=update.effective_chat.id,
-            text="Starting 90 seconds countdown",
+            text="Starting 60 seconds countdown",
         )
         time.sleep(60)
         press('enter')
