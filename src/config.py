@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     TOKEN: str
     POLLING: bool = True
     webhook_url: Optional[str] = None
+    ADMIN_ID: int = 0
 
     @validator("webhook_url", pre=True)
     def assemble_webhook_url(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
