@@ -1,6 +1,10 @@
 import os
 import logging
+import time
 import pytube
+from pytube import YouTube
+from keyboard import press
+
 
 from telegram.ext import Updater, CallbackContext
 from telegram.ext import CommandHandler
@@ -74,6 +78,27 @@ def error(update: Update, context: CallbackContext) -> None:
     :param context: Context object passed to the callback by CommandHandler
     """
     logger.warning('Update "%s" caused error "%s"', update, context.error)
+
+
+def login(update: Update, context: CallbackContext) -> None:
+    """
+    Funciton replies to a /login command sent by user
+
+    :param update: Containts incoming update, usually message
+    :param context: Context object passed to the callback by CommandHandler
+    """
+    if update.effective_user.id == settings.ADMIN_ID:
+        yt = YouTube("https://youtu.be/hCzkkHwR2gg", use_oauth=True, allow_oauth_cache=True)
+        context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="Starting 90 seconds countdown",
+        )
+        time.sleep(60)
+        press('enter')
+        context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="You are logged in",
+        )
 
 
 def main():
