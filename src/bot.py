@@ -4,7 +4,8 @@ import time
 import pytube
 from pytube import YouTube
 import os
-from keyboard import press
+from pynput.keyboard import Key, Controller
+
 
 
 from telegram.ext import Updater, CallbackContext
@@ -98,7 +99,9 @@ def login(update: Update, context: CallbackContext) -> None:
                 text="Starting 60 seconds countdown",
             )
             time.sleep(60)
-            press('enter')
+            
+            keyboard = Controller()
+            keyboard.press(Key.enter)
             context.bot.send_message(
                 chat_id=update.effective_chat.id,
                 text="You are logged in",
