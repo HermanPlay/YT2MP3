@@ -5,7 +5,7 @@ from pydantic import BaseSettings, HttpUrl, validator, parse_obj_as
 # Takes valus from environmental variables, or assigned ones.
 class Settings(BaseSettings):
     TOKEN: str
-    POLLING: bool = False
+    POLLING: bool = True
     webhook_url: Optional[str] = None
 
     @validator("webhook_url", pre=True)
