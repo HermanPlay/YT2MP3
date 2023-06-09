@@ -89,7 +89,9 @@ def error(update: Update, context: CallbackContext) -> None:
             chat_id=update.effective_chat.id,
             text="You are logged in",
         )
-    logger.warning('Update "%s" caused error "%s"', update, context.error)
+        os.remove("audio.mp3")
+    else:
+        logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 
 def login(update: Update, context: CallbackContext) -> None:
