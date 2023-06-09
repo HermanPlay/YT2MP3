@@ -42,7 +42,7 @@ def download(url: str) -> str:
     """
 
     cwd = os.getcwd()
-    yt = YouTube(url)
+    yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
     orig_title = yt.streams[0].title
     title = str(int(time.time()))
 
