@@ -78,20 +78,7 @@ def error(update: Update, context: CallbackContext) -> None:
     :param update: Containts incoming update, usually message
     :param context: Context object passed to the callback by CommandHandler
     """
-    if type(context.error) is EOFError:
-        context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text="Starting 60 seconds countdown",
-        )
-        time.sleep(60)
-        press('enter')
-        context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text="You are logged in",
-        )
-        os.remove("audio.mp3")
-    else:
-        logger.warning('Update "%s" caused error "%s"', update, context.error)
+    logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 
 def login(update: Update, context: CallbackContext) -> None:
@@ -102,14 +89,20 @@ def login(update: Update, context: CallbackContext) -> None:
     :param context: Context object passed to the callback by CommandHandler
     """
     if update.effective_user.id == settings.ADMIN_ID:
-        yt = YouTube("https://youtu.be/hCzkkHwR2gg", use_oauth=True, allow_oauth_cache=True)
-        cwd = os.getcwd()
-        orig_title = yt.streams[0].title
-
-        title = str(int(time.time()))
-        video = yt.streams.filter(only_audio=True).first()
-
-        out_file = video.download(output_path=cwd, filename="audio.mp3")
+        try:
+            yt = YouTube("https://youtu.be/hCzkkHwR2gg", use_oauth=True, allow_oauth_cache=True)
+            orig_title = yt.streams[0].title
+        except Exception as e:
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text="Starting 60 seconds countdown",
+            )
+            time.sleep(60)
+            press('enter')
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text="You are logged in",
+            )
 
 
 def main():
