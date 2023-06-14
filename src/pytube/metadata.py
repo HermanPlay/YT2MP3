@@ -10,19 +10,19 @@ class YouTubeMetadata:
 
         for el in metadata:
             # We only add metadata to the dict if it has a simpleText title.
-            if 'title' in el and 'simpleText' in el['title']:
-                metadata_title = el['title']['simpleText']
+            if "title" in el and "simpleText" in el["title"]:
+                metadata_title = el["title"]["simpleText"]
             else:
                 continue
 
-            contents = el['contents'][0]
-            if 'simpleText' in contents:
-                self._metadata[-1][metadata_title] = contents['simpleText']
-            elif 'runs' in contents:
-                self._metadata[-1][metadata_title] = contents['runs'][0]['text']
+            contents = el["contents"][0]
+            if "simpleText" in contents:
+                self._metadata[-1][metadata_title] = contents["simpleText"]
+            elif "runs" in contents:
+                self._metadata[-1][metadata_title] = contents["runs"][0]["text"]
 
             # Upon reaching a dividing line, create a new grouping
-            if el.get('hasDividerLine', False):
+            if el.get("hasDividerLine", False):
                 self._metadata.append({})
 
         # If we happen to create an empty dict at the end, drop it
