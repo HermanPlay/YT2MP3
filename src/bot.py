@@ -98,8 +98,7 @@ def login(update: Update, context: CallbackContext) -> None:
                 chat_id=update.effective_chat.id,
                 text="Starting 60 seconds countdown",
             )
-            time.sleep(60)
-            
+            time.sleep(60) 
             keyboard = Controller()
             keyboard.press(Key.enter)
             context.bot.send_message(
