@@ -4,8 +4,6 @@ import time
 import pytube
 from pytube import YouTube
 import os
-from pynput.keyboard import Key, Controller
-
 
 
 from telegram.ext import Updater, CallbackContext
