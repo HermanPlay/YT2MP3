@@ -80,31 +80,6 @@ def error(update: Update, context: CallbackContext) -> None:
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 
-def login(update: Update, context: CallbackContext) -> None:
-    """
-    Funciton replies to a /login command sent by user
-
-    :param update: Containts incoming update, usually message
-    :param context: Context object passed to the callback by CommandHandler
-    """
-    if update.effective_user.id == settings.ADMIN_ID:
-        try:
-            yt = YouTube("https://youtu.be/hCzkkHwR2gg", use_oauth=True, allow_oauth_cache=True)
-            orig_title = yt.streams[0].title
-        except Exception as e:
-            context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                text="Starting 60 seconds countdown",
-            )
-            time.sleep(60) 
-            keyboard = Controller()
-            keyboard.press(Key.enter)
-            context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                text="You are logged in",
-            )
-
-
 def main():
     """
     Function applies all the handlers and starts the bot
@@ -116,7 +91,6 @@ def main():
 
     # add commands handlers
     dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("login", login))
     dp.add_handler(CommandHandler("help", help))
 
     # on noncommand i.e message - echo the message on Telegram

@@ -44,6 +44,7 @@ def download(url: str) -> str:
     cwd = os.getcwd()
     yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
     orig_title = yt.streams[0].title
+    orig_title = orig_title.replace("/", "")
     title = str(int(time.time()))
 
     video = yt.streams.filter(only_audio=True).first()
