@@ -1,3 +1,2 @@
 pydantic==1.10.7
 python-telegram-bot==13.13
-pytube==15.0.0
