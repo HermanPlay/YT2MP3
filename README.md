@@ -2,10 +2,6 @@
 
 This Telegram bot is designed to make it easy and convenient for users to download their favorite music from YouTube links. The bot is built using the Telegram Bot API and can process YouTube links that are sent to it. It utilizes a third-party library to download the audio from the YouTube videos and then sends the downloaded file directly to the user via Telegram. 
 
-## WARNING
-
-Currently not working after YouTube update!!
-
 ## Getting Started
 
 To use the bot, simply send a YouTube link to the bot in a private message. The bot will automatically download the audio from the video and send it to you via Telegram. 
