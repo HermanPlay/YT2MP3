@@ -1,19 +1,20 @@
 import os
 import logging
-import time
 import pytube
-from pytube import YouTube
-import os
 
 
 from telegram.ext import Updater, CallbackContext
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler
 from telegram.ext import Filters
+from telegram.ext import ConversationHandler
 from telegram import Update
 
 from downloader import download
-from config import settings
+from config.config import settings
+from config.exceptions import UserNotFoundError
+from db import ClientDB
+from schemas.user import User
 
 # Enable logging
 logging.basicConfig(
@@ -21,6 +22,41 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+db = ClientDB()
+
+ATTEMPTED_LOGINS = []
+EXIT, MESSAGE = range(2)
+
+
+def register_user(effective_user: dict) -> bool:
+    """
+    Function adds new user to the database
+
+    :param effective_user: User object from Telegram API
+    """
+    user_id = effective_user.id
+    logger.info(f"User started the bot: {user_id=}")
+    username = effective_user.username
+    if username is None:
+        username = ""
+    first_name = effective_user.first_name
+    language_code = effective_user.language_code
+    try:
+        db.get_user(user_id)
+    except UserNotFoundError as e:
+        db.add_user(
+            User(
+                username=username,
+                user_id=user_id,
+                first_name=first_name,
+                language_code=language_code,
+            )
+        )
+        logger.info(f"New user registered: {user_id=}")
+        return True
+    else:
+        logger.info(f"User already exists: {user_id=}")
+        return False
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -32,6 +68,11 @@ def start(update: Update, context: CallbackContext) -> None:
     """
 
     update.message.reply_text("Hi! Send me link with audio, which has to be downloaded")
+    if register_user(update.effective_user):
+        context.bot.send_message(
+            chat_id=settings.ADMIN_ID,
+            text="New user has been registered!",
+        )
 
 
 def help(update: Update, context: CallbackContext) -> None:
@@ -52,6 +93,14 @@ def echo(update: Update, context: CallbackContext) -> None:
     :param context: Context object passed to the callback by CommandHandler
     """
     try:
+        # Tempoorary replacement for database
+        user_chat_id = update.effective_chat.id
+        user_id = update.effective_user.id
+        if register_user(update.effective_user):
+            context.bot.send_message(
+                chat_id=settings.ADMIN_ID,
+                text="New user has been registered!",
+            )
         title = download(url=update.message.text)
         with open(f"{title}.mp3", "rb") as audio:
             context.bot.send_audio(chat_id=update.effective_chat.id, audio=audio)
@@ -68,6 +117,42 @@ def echo(update: Update, context: CallbackContext) -> None:
             chat_id=update.effective_chat.id,
             text="Error Occured! Contact Administrator",
         )
+
+
+def send_all(update: Update, context: CallbackContext):
+    if update.effective_user.id != settings.ADMIN_ID:
+        return ConversationHandler.END
+    update.message.reply_text("Send me the message you want to send to all users")
+    return MESSAGE
+
+
+def send_all_message(update: Update, context: CallbackContext):
+    message = update.message.text
+
+    users = [user.user_id for user in db.get_users()]
+
+    users.remove(settings.ADMIN_ID)
+
+    count = 0
+
+    for chat_id in users:
+        try:
+            context.bot.send_message(
+                chat_id=chat_id, text=message, parse_mode="markdown"
+            )
+            count += 1
+        except Exception as e:
+            logger.error('Update "%s" caused exception "%s"', update, e)
+            db.disable_user(chat_id)
+    update.message.reply_text("Message has been sent to all users")
+    update.message.reply_text(f"Message has been sent to {count}/{len(users)} users")
+    update.message.reply_text("See logs for more details")
+    return ConversationHandler.END
+
+
+def exit_conv(update: Update, context: CallbackContext):
+    update.message.reply_text("Aborting sending the message")
+    return ConversationHandler.END
 
 
 def error(update: Update, context: CallbackContext) -> None:
@@ -92,6 +177,16 @@ def main():
     # add commands handlers
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(
+        ConversationHandler(
+            entry_points=[CommandHandler("send_all", send_all)],
+            states={
+                MESSAGE: [MessageHandler(Filters.text, send_all_message)],
+                EXIT: [MessageHandler(Filters.text, exit_conv)],
+            },
+            fallbacks=[CommandHandler("exit", exit_conv)],
+        )
+    )
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
