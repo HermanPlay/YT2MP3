@@ -5,7 +5,7 @@ from pydantic import BaseSettings, validator
 # Takes valus from environmental variables, or assigned ones.
 class Settings(BaseSettings):
     TOKEN: str
-    POLLING: bool = True
+    POLLING: bool = False
     webhook_url: Optional[str] = None
     ADMIN_ID: int = 0
     DB_PASSWORD: str
