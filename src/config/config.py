@@ -1,11 +1,11 @@
 from typing import Optional, Dict, Any
-from pydantic import BaseSettings, HttpUrl, validator, parse_obj_as
+from pydantic import BaseSettings, validator
 
 
 # Takes valus from environmental variables, or assigned ones.
 class Settings(BaseSettings):
     TOKEN: str
-    POLLING: bool = False
+    POLLING: bool = True
     webhook_url: Optional[str] = None
     ADMIN_ID: int = 0
     DB_PASSWORD: str
@@ -16,8 +16,8 @@ class Settings(BaseSettings):
         if isinstance(v, str):
             return v
         return "https://yt2mp3-bot.herokuapp.com/" + values.get("TOKEN")
-    
-    @validator("DB_URI", pre=True)  
+
+    @validator("DB_URI", pre=True)
     def assemble_db_uri(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
         if isinstance(v, cls):
             return v
