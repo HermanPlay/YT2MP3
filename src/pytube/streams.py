@@ -70,7 +70,8 @@ class Stream:
             ceil(float(stream.get("contentLength", 0)) / 1024 / 1024 * 1000) / 1000
         )
 
-        # filesize in gigabytes(fingers crossed we don't need terabytes going forward though)
+        # filesize in gigabytes
+        # (fingers crossed we don't need terabytes going forward though)
         self._filesize_gb: Optional[float] = float(
             ceil(float(stream.get("contentLength", 0)) / 1024 / 1024 / 1024 * 1000)
             / 1000
