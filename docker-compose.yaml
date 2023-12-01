@@ -1,0 +1,11 @@
+version: '3.11'
+services:
+  yt2mp3-bot:
+    image: yt2mp3:latest
+    build:
+      dockerfile: Dockerfile
+    environment: 
+      TOKEN: $TOKEN
+      DB_PASSWORD: $DB_PASSWORD
+      ADMIN_ID: $ADMIN_ID
+      POLLING: True
