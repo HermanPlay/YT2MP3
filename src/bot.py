@@ -1,6 +1,6 @@
 import os
 import logging
-import pytube
+import pytubefix
 
 
 from telegram.ext import Updater, CallbackContext
@@ -105,7 +105,7 @@ def echo(update: Update, context: CallbackContext) -> None:
         with open(f"{title}.mp3", "rb") as audio:
             context.bot.send_audio(chat_id=update.effective_chat.id, audio=audio)
         os.remove(f"{title}.mp3")
-    except pytube.exceptions.RegexMatchError as e:
+    except pytubefix.exceptions.RegexMatchError as e:
         context.bot.send_message(
             chat_id=update.effective_chat.id,
             text="Invalid link! Try again",
