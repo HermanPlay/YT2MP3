@@ -1,8 +1,10 @@
 """Library specific exception definitions."""
 from typing import Pattern, Union
+from .colors import Color
 
+c = Color()
 
-class PytubeError(Exception):
+class PytubeFixError(Exception):
     """Base pytube exception that all others inherit.
 
     This is done to not pollute the built-in exceptions, which *could* result
@@ -10,16 +12,15 @@ class PytubeError(Exception):
     implementers code.
     """
 
-
-class MaxRetriesExceeded(PytubeError):
+class MaxRetriesExceeded(PytubeFixError):
     """Maximum number of retries exceeded."""
 
 
-class HTMLParseError(PytubeError):
+class HTMLParseError(PytubeFixError):
     """HTML could not be parsed"""
 
 
-class ExtractError(PytubeError):
+class ExtractError(PytubeFixError):
     """Data extraction based exception."""
 
 
@@ -33,14 +34,13 @@ class RegexMatchError(ExtractError):
         :param str pattern:
             Pattern that failed to match
         """
-        super().__init__(f"{caller}: could not find match for {pattern}")
+        super().__init__(c.RED + f"{caller}: could not find match for {pattern}" + c.RESET)
         self.caller = caller
         self.pattern = pattern
 
 
-class VideoUnavailable(PytubeError):
+class VideoUnavailable(PytubeFixError):
     """Base video unavailable error."""
-
     def __init__(self, video_id: str):
         """
         :param str video_id:
@@ -51,12 +51,11 @@ class VideoUnavailable(PytubeError):
 
     @property
     def error_string(self):
-        return f"{self.video_id} is unavailable"
+        return c.RED + f'{self.video_id} is unavailable' + c.RESET
 
 
 class AgeRestrictedError(VideoUnavailable):
     """Video is age restricted, and cannot be accessed without OAuth."""
-
     def __init__(self, video_id: str):
         """
         :param str video_id:
@@ -67,12 +66,11 @@ class AgeRestrictedError(VideoUnavailable):
 
     @property
     def error_string(self):
-        return f"{self.video_id} is age restricted, and can't be accessed without logging in."
+        return c.RED + f"Video ID = {self.video_id}: is age restricted, and can't be accessed without logging in." + c.RESET
 
 
 class LiveStreamError(VideoUnavailable):
     """Video is a live stream."""
-
     def __init__(self, video_id: str):
         """
         :param str video_id:
@@ -83,7 +81,7 @@ class LiveStreamError(VideoUnavailable):
 
     @property
     def error_string(self):
-        return f"{self.video_id} is streaming live and cannot be loaded"
+        return c.RED + f'{self.video_id} is streaming live and cannot be loaded' + c.RESET
 
 
 class VideoPrivate(VideoUnavailable):
@@ -97,7 +95,7 @@ class VideoPrivate(VideoUnavailable):
 
     @property
     def error_string(self):
-        return f"{self.video_id} is a private video"
+        return c.RED + f'{self.video_id} is a private video' + c.RESET
 
 
 class RecordingUnavailable(VideoUnavailable):
@@ -111,7 +109,7 @@ class RecordingUnavailable(VideoUnavailable):
 
     @property
     def error_string(self):
-        return f"{self.video_id} does not have a live stream recording available"
+        return c.RED + f'{self.video_id} does not have a live stream recording available' + c.RESET
 
 
 class MembersOnly(VideoUnavailable):
@@ -121,7 +119,6 @@ class MembersOnly(VideoUnavailable):
     subscribed to a content creator.
     ref: https://support.google.com/youtube/answer/7544492?hl=en
     """
-
     def __init__(self, video_id: str):
         """
         :param str video_id:
@@ -132,7 +129,7 @@ class MembersOnly(VideoUnavailable):
 
     @property
     def error_string(self):
-        return f"{self.video_id} is a members-only video"
+        return c.RED + f'{self.video_id} is a members-only video' + c.RESET
 
 
 class VideoRegionBlocked(VideoUnavailable):
@@ -146,4 +143,4 @@ class VideoRegionBlocked(VideoUnavailable):
 
     @property
     def error_string(self):
-        return f"{self.video_id} is not available in your region"
+        return c.RED + f'{self.video_id} is not available in your region' + c.RESET

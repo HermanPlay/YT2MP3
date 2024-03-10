@@ -3,8 +3,8 @@
 import logging
 
 # Local imports
-from pytube import YouTube
-from pytube.innertube import InnerTube
+from pytubefix import YouTube
+from pytubefix.innertube import InnerTube
 
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ class Search:
             Search query provided by the user.
         """
         self.query = query
-        self._innertube_client = InnerTube(client="WEB")
+        self._innertube_client = InnerTube(client='WEB')
 
         # The first search, without a continuation, is structured differently
         #  and contains completion suggestions, so we must store this separately
@@ -42,7 +42,7 @@ class Search:
         if self._completion_suggestions:
             return self._completion_suggestions
         if self.results:
-            self._completion_suggestions = self._initial_results["refinements"]
+            self._completion_suggestions = self._initial_results['refinements']
         return self._completion_suggestions
 
     @property
@@ -91,127 +91,119 @@ class Search:
 
         # Initial result is handled by try block, continuations by except block
         try:
-            sections = raw_results["contents"]["twoColumnSearchResultsRenderer"][
-                "primaryContents"
-            ]["sectionListRenderer"]["contents"]
+            sections = raw_results['contents']['twoColumnSearchResultsRenderer'][
+                'primaryContents']['sectionListRenderer']['contents']
         except KeyError:
-            sections = raw_results["onResponseReceivedCommands"][0][
-                "appendContinuationItemsAction"
-            ]["continuationItems"]
+            sections = raw_results['onResponseReceivedCommands'][0][
+                'appendContinuationItemsAction']['continuationItems']
         item_renderer = None
         continuation_renderer = None
         for s in sections:
-            if "itemSectionRenderer" in s:
-                item_renderer = s["itemSectionRenderer"]
-            if "continuationItemRenderer" in s:
-                continuation_renderer = s["continuationItemRenderer"]
+            if 'itemSectionRenderer' in s:
+                item_renderer = s['itemSectionRenderer']
+            if 'continuationItemRenderer' in s:
+                continuation_renderer = s['continuationItemRenderer']
 
         # If the continuationItemRenderer doesn't exist, assume no further results
         if continuation_renderer:
-            next_continuation = continuation_renderer["continuationEndpoint"][
-                "continuationCommand"
-            ]["token"]
+            next_continuation = continuation_renderer['continuationEndpoint'][
+                'continuationCommand']['token']
         else:
             next_continuation = None
 
         # If the itemSectionRenderer doesn't exist, assume no results.
         if item_renderer:
             videos = []
-            raw_video_list = item_renderer["contents"]
+            raw_video_list = item_renderer['contents']
             for video_details in raw_video_list:
                 # Skip over ads
-                if video_details.get("searchPyvRenderer", {}).get("ads", None):
+                if video_details.get('searchPyvRenderer', {}).get('ads', None):
                     continue
 
                 # Skip "recommended" type videos e.g. "people also watched" and "popular X"
                 #  that break up the search results
-                if "shelfRenderer" in video_details:
+                if 'shelfRenderer' in video_details:
                     continue
 
                 # Skip auto-generated "mix" playlist results
-                if "radioRenderer" in video_details:
+                if 'radioRenderer' in video_details:
                     continue
 
                 # Skip playlist results
-                if "playlistRenderer" in video_details:
+                if 'playlistRenderer' in video_details:
                     continue
 
                 # Skip channel results
-                if "channelRenderer" in video_details:
+                if 'channelRenderer' in video_details:
                     continue
 
                 # Skip 'people also searched for' results
-                if "horizontalCardListRenderer" in video_details:
+                if 'horizontalCardListRenderer' in video_details:
                     continue
 
                 # Can't seem to reproduce, probably related to typo fix suggestions
-                if "didYouMeanRenderer" in video_details:
+                if 'didYouMeanRenderer' in video_details:
                     continue
 
                 # Seems to be the renderer used for the image shown on a no results page
-                if "backgroundPromoRenderer" in video_details:
+                if 'backgroundPromoRenderer' in video_details:
                     continue
 
-                if "videoRenderer" not in video_details:
-                    logger.warn("Unexpected renderer encountered.")
-                    logger.warn(f"Renderer name: {video_details.keys()}")
-                    logger.warn(f"Search term: {self.query}")
-                    logger.warn(
-                        "Please open an issue at "
-                        "https://github.com/pytube/pytube/issues "
-                        "and provide this log output."
+                if 'videoRenderer' not in video_details:
+                    logger.warning('Unexpected renderer encountered.')
+                    logger.warning(f'Renderer name: {video_details.keys()}')
+                    logger.warning(f'Search term: {self.query}')
+                    logger.warning(
+                        'Please open an issue at '
+                        'https://github.com/pytube/pytube/issues '
+                        'and provide this log output.'
                     )
                     continue
 
                 # Extract relevant video information from the details.
                 # Some of this can be used to pre-populate attributes of the
                 #  YouTube object.
-                vid_renderer = video_details["videoRenderer"]
-                vid_id = vid_renderer["videoId"]
-                vid_url = f"https://www.youtube.com/watch?v={vid_id}"
-                vid_title = vid_renderer["title"]["runs"][0]["text"]
-                vid_channel_name = vid_renderer["ownerText"]["runs"][0]["text"]
-                vid_channel_uri = vid_renderer["ownerText"]["runs"][0][
-                    "navigationEndpoint"
-                ]["commandMetadata"]["webCommandMetadata"]["url"]
+                vid_renderer = video_details['videoRenderer']
+                vid_id = vid_renderer['videoId']
+                vid_url = f'https://www.youtube.com/watch?v={vid_id}'
+                vid_title = vid_renderer['title']['runs'][0]['text']
+                vid_channel_name = vid_renderer['ownerText']['runs'][0]['text']
+                vid_channel_uri = vid_renderer['ownerText']['runs'][0][
+                    'navigationEndpoint']['commandMetadata']['webCommandMetadata']['url']
                 # Livestreams have "runs", non-livestreams have "simpleText",
                 #  and scheduled releases do not have 'viewCountText'
-                if "viewCountText" in vid_renderer:
-                    if "runs" in vid_renderer["viewCountText"]:
-                        vid_view_count_text = vid_renderer["viewCountText"]["runs"][0][
-                            "text"
-                        ]
+                if 'viewCountText' in vid_renderer:
+                    if 'runs' in vid_renderer['viewCountText']:
+                        vid_view_count_text = vid_renderer['viewCountText']['runs'][0]['text']
                     else:
-                        vid_view_count_text = vid_renderer["viewCountText"][
-                            "simpleText"
-                        ]
+                        vid_view_count_text = vid_renderer['viewCountText']['simpleText']
                     # Strip ' views' text, then remove commas
-                    stripped_text = vid_view_count_text.split()[0].replace(",", "")
-                    if stripped_text == "No":
+                    stripped_text = vid_view_count_text.split()[0].replace(',','')
+                    if stripped_text == 'No':
                         vid_view_count = 0
                     else:
                         vid_view_count = int(stripped_text)
                 else:
                     vid_view_count = 0
-                if "lengthText" in vid_renderer:
-                    vid_length = vid_renderer["lengthText"]["simpleText"]
+                if 'lengthText' in vid_renderer:
+                    vid_length = vid_renderer['lengthText']['simpleText']
                 else:
                     vid_length = None
 
                 vid_metadata = {
-                    "id": vid_id,
-                    "url": vid_url,
-                    "title": vid_title,
-                    "channel_name": vid_channel_name,
-                    "channel_url": vid_channel_uri,
-                    "view_count": vid_view_count,
-                    "length": vid_length,
+                    'id': vid_id,
+                    'url': vid_url,
+                    'title': vid_title,
+                    'channel_name': vid_channel_name,
+                    'channel_url': vid_channel_uri,
+                    'view_count': vid_view_count,
+                    'length': vid_length
                 }
 
                 # Construct YouTube object from metadata and append to results
-                vid = YouTube(vid_metadata["url"])
-                vid.author = vid_metadata["channel_name"]
-                vid.title = vid_metadata["title"]
+                vid = YouTube(vid_metadata['url'])
+                vid.author = vid_metadata['channel_name']
+                vid.title = vid_metadata['title']
                 videos.append(vid)
         else:
             videos = None

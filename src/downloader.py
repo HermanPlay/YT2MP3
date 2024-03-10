@@ -1,4 +1,5 @@
-from pytube import YouTube
+# from pytube import YouTube
+from pytubefix import YouTube
 import os
 import time
 
@@ -43,17 +44,13 @@ def download(url: str) -> str:
 
     cwd = os.getcwd()
     yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
-    orig_title = yt.streams[0].title
+    ys = yt.streams.get_audio_only()
+    orig_title = yt.title
     orig_title = orig_title.replace("/", "")
     title = str(int(time.time()))
 
-    video = yt.streams.filter(only_audio=True).first()
-
-    # download the file
-    out_file = video.download(output_path=cwd, filename="audio.mp3")
-    print("Downloaded file, processing forward!")
-
     new_file = title + ".mp3"
+    out_file = ys.download(mp3=True)
     os.rename(out_file, new_file)
 
     try:
@@ -61,5 +58,5 @@ def download(url: str) -> str:
     except Exception as e:
         print(f"Failed converting to wav and mp3 | {e}")
 
-    os.rename(new_file, f"{orig_title}.mp3")
+    os.rename(new_file, orig_title + ".mp3")
     return orig_title
