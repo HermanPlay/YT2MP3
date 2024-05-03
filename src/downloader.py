@@ -42,7 +42,6 @@ def download(url: str) -> str:
     :return: Name of the downloaded file
     """
 
-    cwd = os.getcwd()
     yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
     ys = yt.streams.get_audio_only()
     orig_title = yt.title

@@ -4,7 +4,7 @@ ENV POLLING=True
 
 RUN apt-get -y update && apt-get -y upgrade && apt-get install -y --no-install-recommends ffmpeg
 
-RUN conda create -n virtualenv python=3.11
+RUN conda create -n virtualenv python=3.11 -y
 
 COPY requirements.txt .
 

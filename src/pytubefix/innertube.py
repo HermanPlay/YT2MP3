@@ -41,7 +41,8 @@ _default_clients = {
         'header': {
             'User-Agent': 'Mozilla/5.0'
         },
-        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'
+        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+        'require_js_player': True
     },
     'ANDROID': {
         'innertube_context': {
@@ -52,12 +53,13 @@ _default_clients = {
                     'androidSdkVersion': 30
                 }
             },
-            "params": "CgIQBg"
+            "params": "CgIIAdgDAQ%3D%3D"
         },
         'header': {
             'User-Agent': 'com.google.android.youtube/',
         },
-        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'
+        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+        'require_js_player': False
     },
     'IOS': {
         'innertube_context': {
@@ -72,7 +74,8 @@ _default_clients = {
         'header': {
             'User-Agent': 'com.google.ios.youtube/'
         },
-        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'
+        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+        'require_js_player': False
     },
 
     'WEB_EMBED': {
@@ -88,7 +91,8 @@ _default_clients = {
         'header': {
             'User-Agent': 'Mozilla/5.0'
         },
-        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'
+        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+        'require_js_player': True
     },
     'ANDROID_EMBED': {
         'innertube_context': {
@@ -104,7 +108,8 @@ _default_clients = {
         'header': {
             'User-Agent': 'com.google.android.youtube/'
         },
-        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'
+        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+        'require_js_player': False
     },
     'IOS_EMBED': {
         'innertube_context': {
@@ -119,7 +124,8 @@ _default_clients = {
         'header': {
             'User-Agent': 'com.google.ios.youtube/'
         },
-        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'
+        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+        'require_js_player': False
     },
 
     'WEB_MUSIC': {
@@ -134,7 +140,8 @@ _default_clients = {
         'header': {
             'User-Agent': 'Mozilla/5.0'
         },
-        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'
+        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+        'require_js_player': True
     },
     'ANDROID_MUSIC': {
         'innertube_context': {
@@ -149,7 +156,8 @@ _default_clients = {
         'header': {
             'User-Agent': 'com.google.android.apps.youtube.music/'
         },
-        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'
+        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+        'require_js_player': False
     },
     'IOS_MUSIC': {
         'innertube_context': {
@@ -164,7 +172,8 @@ _default_clients = {
         'header': {
             'User-Agent': 'com.google.ios.youtubemusic/'
         },
-        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'
+        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+        'require_js_player': False
     },
 
     'WEB_CREATOR': {
@@ -179,7 +188,8 @@ _default_clients = {
         'header': {
             'User-Agent': 'Mozilla/5.0'
         },
-        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'
+        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+        'require_js_player': True
     },
     'ANDROID_CREATOR': {
         'innertube_context': {
@@ -194,7 +204,8 @@ _default_clients = {
         'header': {
             'User-Agent': 'com.google.android.apps.youtube.creator/',
         },
-        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'
+        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+        'require_js_player': False
     },
     'IOS_CREATOR': {
         'innertube_context': {
@@ -209,9 +220,25 @@ _default_clients = {
         'header': {
             'User-Agent': 'com.google.ios.ytcreator/'
         },
-        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'
+        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+        'require_js_player': False
     },
-
+    'ANDROID_TESTSUITE': {
+        'innertube_context': {
+            'context': {
+                'client': {
+                    'clientName': 'ANDROID_TESTSUITE',
+                    'clientVersion': '1.9',
+                    'androidSdkVersion': 30
+                }
+            }
+        },
+        'header': {
+            'User-Agent': 'com.google.android.youtube/',
+        },
+        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+        'require_js_player': False
+    },
     'MWEB': {
         'inertube_context': {
             'context': {
@@ -224,7 +251,8 @@ _default_clients = {
         'header': {
             'User-Agent': 'Mozilla/5.0'
         },
-        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'
+        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+        'require_js_player': True
     },
 
     'TV_EMBED': {
@@ -239,7 +267,8 @@ _default_clients = {
         'header': {
             'User-Agent': 'Mozilla/5.0'
         },
-        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'
+        'api_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+        'require_js_player': True
     },
 }
 _token_timeout = 1800
@@ -264,6 +293,7 @@ class InnerTube:
         self.innertube_context = _default_clients[client]['innertube_context']
         self.header = _default_clients[client]['header']
         self.api_key = _default_clients[client]['api_key']
+        self.require_js_player = _default_clients[client]['require_js_player']
         self.access_token = None
         self.refresh_token = None
         self.use_oauth = use_oauth
@@ -273,15 +303,13 @@ class InnerTube:
         self.expires = None
 
         # Try to load from file if specified
-        if self.use_oauth and self.allow_cache:
-            # Try to load from file if possible
-            if os.path.exists(_token_file):
-                with open(_token_file) as f:
-                    data = json.load(f)
-                    self.access_token = data['access_token']
-                    self.refresh_token = data['refresh_token']
-                    self.expires = data['expires']
-                    self.refresh_bearer_token()
+        if self.use_oauth and self.allow_cache and os.path.exists(_token_file):
+            with open(_token_file) as f:
+                data = json.load(f)
+                self.access_token = data['access_token']
+                self.refresh_token = data['refresh_token']
+                self.expires = data['expires']
+                self.refresh_bearer_token()
 
     def cache_tokens(self):
         """Cache tokens to file if allowed."""
@@ -408,10 +436,10 @@ class InnerTube:
         if self.use_oauth:
             if self.access_token:
                 self.refresh_bearer_token()
-                headers['Authorization'] = f'Bearer {self.access_token}'
             else:
                 self.fetch_bearer_token()
-                headers['Authorization'] = f'Bearer {self.access_token}'
+
+            headers['Authorization'] = f'Bearer {self.access_token}'
 
         headers.update(self.header)
 

@@ -117,6 +117,7 @@ def echo(update: Update, context: CallbackContext) -> None:
             chat_id=update.effective_chat.id,
             text="Error Occured! Contact Administrator",
         )
+        raise e
 
 
 def send_all(update: Update, context: CallbackContext):
