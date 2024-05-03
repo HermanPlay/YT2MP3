@@ -110,9 +110,8 @@ def echo(update: Update, context: CallbackContext) -> None:
             chat_id=update.effective_chat.id,
             text="Invalid link! Try again",
         )
-        logger.warning('Update "%s" caused error "%s"', update, e)
+        raise e
     except Exception as e:
-        logger.error('Update "%s" caused exception "%s"', update, e)
         context.bot.send_message(
             chat_id=update.effective_chat.id,
             text="Error Occured! Contact Administrator",
