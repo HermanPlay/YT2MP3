@@ -52,10 +52,8 @@ def register_user(effective_user: dict) -> bool:
                 language_code=language_code,
             )
         )
-        logger.info(f"New user registered: {user_id=}")
         return True
     else:
-        logger.info(f"User already exists: {user_id=}")
         return False
 
 
@@ -69,10 +67,7 @@ def start(update: Update, context: CallbackContext) -> None:
 
     update.message.reply_text("Hi! Send me link with audio, which has to be downloaded")
     if register_user(update.effective_user):
-        context.bot.send_message(
-            chat_id=settings.ADMIN_ID,
-            text="New user has been registered!",
-        )
+        logger.info(f"New user registered: {update.effective_user.id=}")
 
 
 def help(update: Update, context: CallbackContext) -> None:
@@ -97,10 +92,7 @@ def echo(update: Update, context: CallbackContext) -> None:
         user_chat_id = update.effective_chat.id
         user_id = update.effective_user.id
         if register_user(update.effective_user):
-            context.bot.send_message(
-                chat_id=settings.ADMIN_ID,
-                text="New user has been registered!",
-            )
+            logger.info(f"New user registered: {update.effective_user.id=}")
         title = download(url=update.message.text)
         with open(f"{title}.mp3", "rb") as audio:
             context.bot.send_audio(chat_id=update.effective_chat.id, audio=audio)
