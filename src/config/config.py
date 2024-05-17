@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     ADMIN_ID: int = 0
     DB_PASSWORD: str
     DB_URI: Optional[str] = None
+    SUPPORT_LINK: str = "@yt_mp3_support_bot"
 
     @validator("webhook_url", pre=True)
     def assemble_webhook_url(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
