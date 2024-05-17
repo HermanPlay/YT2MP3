@@ -112,10 +112,6 @@ def echo(update: Update, context: CallbackContext) -> None:
         )
         raise e
     except Exception as e:
-        context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text="Error Occured! Contact Administrator",
-        )
         raise e
 
 
@@ -162,6 +158,10 @@ def error(update: Update, context: CallbackContext) -> None:
     :param update: Containts incoming update, usually message
     :param context: Context object passed to the callback by CommandHandler
     """
+    context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=f"Error Occured! Contact here {settings.SUPPORT_LINK}",
+    )
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 
