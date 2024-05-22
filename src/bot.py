@@ -102,13 +102,11 @@ def echo(update: Update, context: CallbackContext) -> None:
             chat_id=update.effective_chat.id,
             text="Invalid link! Try again",
         )
-        raise e
     except FileTooLarge as e:
         context.bot.send_message(
             chat_id=update.effective_chat.id,
             text="File is too large to send via telegram bot. I am not able to download such long videos! Please use shorter video",
         )
-        raise e
     except Exception as e:
         raise e
 
