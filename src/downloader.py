@@ -2,6 +2,7 @@
 from pytubefix import YouTube
 import os
 import time
+from config.exceptions import FileTooLarge
 
 
 def fix(title: str) -> None:
@@ -40,6 +41,8 @@ def download(url: str) -> str:
 
     :param url: YouTube video url
     :return: Name of the downloaded file
+
+    :raises: FileTooLarge if file exceeds telegram max upload file size
     """
 
     yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
@@ -58,4 +61,9 @@ def download(url: str) -> str:
         print(f"Failed converting to wav and mp3 | {e}")
 
     os.rename(new_file, orig_title + ".mp3")
+
+    file_size = os.path.getsize(orig_title + ".mp3")
+    max_file_size = 50 * 1000 * 1000  # 50 MB
+    if file_size > max_file_size:
+        raise FileTooLarge("The file is too large to send via telegaram bot")
     return orig_title
