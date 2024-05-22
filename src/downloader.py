@@ -66,8 +66,6 @@ def download(url: str) -> str:
         orig_title = orig_title[:120]
 
     orig_title = str_to_ascii(orig_title)
-    _logger.info(f"{len(orig_title)=}")
-    _logger.info(f"{orig_title=}")
     orig_title = orig_title.replace("/", "")
     title = str(int(time.time()))
 
@@ -77,9 +75,7 @@ def download(url: str) -> str:
     except Exception as e:
         print(f"Failed converting to wav and mp3 | {e}")
 
-    _logger.info("Before second rename")
     os.rename(out_file, orig_title + ".mp3")
-    _logger.info("Second rename")
 
     file_size = os.path.getsize(orig_title + ".mp3")
     max_file_size = 50 * 1000 * 1000  # 50 MB
