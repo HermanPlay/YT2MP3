@@ -1,8 +1,21 @@
-# from pytube import YouTube
 from pytubefix import YouTube
 import os
 import time
 from config.exceptions import FileTooLarge
+import logging
+
+_logger = logging.getLogger(__name__)
+
+
+def str_to_ascii(s: str) -> str:
+    """
+    Function converts string to ascii characters
+
+    :param s: String to convert
+    :return: Converted string
+    """
+
+    return "".join(i if ord(i) < 128 else " " for i in s)
 
 
 def fix(title: str) -> None:
@@ -48,19 +61,25 @@ def download(url: str) -> str:
     yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
     ys = yt.streams.get_audio_only()
     orig_title = yt.title
+    max_filename_length = 120
+    if len(orig_title) > max_filename_length:
+        orig_title = orig_title[:120]
+
+    orig_title = str_to_ascii(orig_title)
+    _logger.info(f"{len(orig_title)=}")
+    _logger.info(f"{orig_title=}")
     orig_title = orig_title.replace("/", "")
     title = str(int(time.time()))
 
-    new_file = title + ".mp3"
-    out_file = ys.download(mp3=True)
-    os.rename(out_file, new_file)
-
+    out_file = ys.download(mp3=True, filename=title)
     try:
         fix(title)
     except Exception as e:
         print(f"Failed converting to wav and mp3 | {e}")
 
-    os.rename(new_file, orig_title + ".mp3")
+    _logger.info("Before second rename")
+    os.rename(out_file, orig_title + ".mp3")
+    _logger.info("Second rename")
 
     file_size = os.path.getsize(orig_title + ".mp3")
     max_file_size = 50 * 1000 * 1000  # 50 MB
