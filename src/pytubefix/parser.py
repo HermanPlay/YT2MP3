@@ -1,6 +1,7 @@
 import ast
 import json
 import re
+
 from pytubefix.exceptions import HTMLParseError
 
 
@@ -32,7 +33,7 @@ def parse_for_all_objects(html, preceding_regex):
                 result.append(obj)
 
     if not result:
-        raise HTMLParseError(f'No matches for regex {preceding_regex}')
+        raise HTMLParseError(f"No matches for regex {preceding_regex}")
 
     return result
 
@@ -51,7 +52,7 @@ def parse_for_object(html, preceding_regex):
     regex = re.compile(preceding_regex)
     result = regex.search(html)
     if not result:
-        raise HTMLParseError(f'No matches for regex {preceding_regex}')
+        raise HTMLParseError(f"No matches for regex {preceding_regex}")
 
     start_index = result.end()
     return parse_for_object_from_startpoint(html, start_index)
@@ -69,28 +70,28 @@ def find_object_from_startpoint(html, start_point):
         A dict created from parsing the object.
     """
     html = html[start_point:]
-    if html[0] not in ['{','[']:
-        raise HTMLParseError(f'Invalid start point. Start of HTML:\n{html[:20]}')
+    if html[0] not in ["{", "["]:
+        raise HTMLParseError(f"Invalid start point. Start of HTML:\n{html[:20]}")
 
     # First letter MUST be a open brace, so we put that in the stack,
     # and skip the first character.
-    last_char = '{'
+    last_char = "{"
     curr_char = None
     stack = [html[0]]
     i = 1
 
     context_closers = {
-        '{': '}',
-        '[': ']',
+        "{": "}",
+        "[": "]",
         '"': '"',
-        '\'': '\'',
-        '/': '/' # javascript regex
+        "'": "'",
+        "/": "/",  # javascript regex
     }
 
     while i < len(html):
         if not stack:
             break
-        if curr_char not in [' ', '\n']:
+        if curr_char not in [" ", "\n"]:
             last_char = curr_char
         curr_char = html[i]
         curr_context = stack[-1]
@@ -103,16 +104,20 @@ def find_object_from_startpoint(html, start_point):
 
         # Strings and regex expressions require special context handling because they can contain
         #  context openers *and* closers
-        if curr_context in ['"', '\'', '/']:
+        if curr_context in ['"', "'", "/"]:
             # If there's a backslash in a string or regex expression, we skip a character
-            if curr_char == '\\':
+            if curr_char == "\\":
                 i += 2
                 continue
         else:
             # Non-string contexts are when we need to look for context openers.
             if curr_char in context_closers.keys():
                 # Slash starts a regular expression depending on context
-                if not (curr_char == '/' and last_char not in ['(', ',', '=', ':', '[', '!', '&', '|', '?', '{', '}', ';']): 
+                if not (
+                    curr_char == "/"
+                    and last_char
+                    not in ["(", ",", "=", ":", "[", "!", "&", "|", "?", "{", "}", ";"]
+                ):
                     stack.append(curr_char)
 
         i += 1
@@ -139,7 +144,7 @@ def parse_for_object_from_startpoint(html, start_point):
         try:
             return ast.literal_eval(full_obj)
         except (ValueError, SyntaxError):
-            raise HTMLParseError('Could not parse object.')
+            raise HTMLParseError("Could not parse object.")
 
 
 def throttling_array_split(js_array):
@@ -160,15 +165,15 @@ def throttling_array_split(js_array):
     func_regex = re.compile(r"function\([^)]*\)")
 
     while len(curr_substring) > 0:
-        if curr_substring.startswith('function'):
+        if curr_substring.startswith("function"):
             # Handle functions separately. These can contain commas
             match = func_regex.search(curr_substring)
             match_start, match_end = match.span()
 
             function_text = find_object_from_startpoint(curr_substring, match.span()[1])
-            full_function_def = curr_substring[:match_end + len(function_text)]
+            full_function_def = curr_substring[: match_end + len(function_text)]
             results.append(full_function_def)
-            curr_substring = curr_substring[len(full_function_def) + 1:]
+            curr_substring = curr_substring[len(full_function_def) + 1 :]
         else:
             match = comma_regex.search(curr_substring)
 

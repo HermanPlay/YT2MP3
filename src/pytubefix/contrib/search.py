@@ -3,10 +3,13 @@
 import logging
 from typing import List
 
-# Local imports
-from pytubefix import YouTube, Channel, Playlist
+from pytubefix import Channel
+from pytubefix import Playlist
+from pytubefix import YouTube
 from pytubefix.helpers import deprecated
 from pytubefix.innertube import InnerTube
+
+# Local imports
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +22,7 @@ class Search:
             Search query provided by the user.
         """
         self.query = query
-        self._innertube_client = InnerTube(client='WEB')
+        self._innertube_client = InnerTube(client="WEB")
 
         # The first search, without a continuation, is structured differently
         #  and contains completion suggestions, so we must store this separately
@@ -43,7 +46,7 @@ class Search:
         if self._completion_suggestions:
             return self._completion_suggestions
         if self.results:
-            self._completion_suggestions = self._initial_results['refinements']
+            self._completion_suggestions = self._initial_results["refinements"]
         return self._completion_suggestions
 
     @property
@@ -60,12 +63,12 @@ class Search:
         if not self._results:
             results, continuation = self.fetch_and_parse()
             self._current_continuation = continuation
-            self._results['videos'] = results['videos']
-            self._results['shorts'] = results['shorts']
-            self._results['playlist'] = results['playlist']
-            self._results['channel'] = results['channel']
+            self._results["videos"] = results["videos"]
+            self._results["shorts"] = results["shorts"]
+            self._results["playlist"] = results["playlist"]
+            self._results["channel"] = results["channel"]
 
-        return [items for items in self._results['videos']]
+        return [items for items in self._results["videos"]]
 
     @property
     def shorts(self) -> List[YouTube]:
@@ -81,12 +84,12 @@ class Search:
         if not self._results:
             results, continuation = self.fetch_and_parse()
             self._current_continuation = continuation
-            self._results['videos'] = results['videos']
-            self._results['shorts'] = results['shorts']
-            self._results['playlist'] = results['playlist']
-            self._results['channel'] = results['channel']
+            self._results["videos"] = results["videos"]
+            self._results["shorts"] = results["shorts"]
+            self._results["playlist"] = results["playlist"]
+            self._results["channel"] = results["channel"]
 
-        return [items for items in self._results['shorts']]
+        return [items for items in self._results["shorts"]]
 
     @property
     def playlist(self) -> List[Playlist]:
@@ -102,12 +105,12 @@ class Search:
         if not self._results:
             results, continuation = self.fetch_and_parse()
             self._current_continuation = continuation
-            self._results['videos'] = results['videos']
-            self._results['shorts'] = results['shorts']
-            self._results['playlist'] = results['playlist']
-            self._results['channel'] = results['channel']
+            self._results["videos"] = results["videos"]
+            self._results["shorts"] = results["shorts"]
+            self._results["playlist"] = results["playlist"]
+            self._results["channel"] = results["channel"]
 
-        return [items for items in self._results['playlist']]
+        return [items for items in self._results["playlist"]]
 
     @property
     def channel(self) -> List[Channel]:
@@ -123,12 +126,12 @@ class Search:
         if not self._results:
             results, continuation = self.fetch_and_parse()
             self._current_continuation = continuation
-            self._results['videos'] = results['videos']
-            self._results['shorts'] = results['shorts']
-            self._results['playlist'] = results['playlist']
-            self._results['channel'] = results['channel']
+            self._results["videos"] = results["videos"]
+            self._results["shorts"] = results["shorts"]
+            self._results["playlist"] = results["playlist"]
+            self._results["channel"] = results["channel"]
 
-        return [items for items in self._results['channel']]
+        return [items for items in self._results["channel"]]
 
     @property
     @deprecated("Get video results using: .videos")
@@ -163,10 +166,10 @@ class Search:
         if self._current_continuation:
             results, continuation = self.fetch_and_parse(self._current_continuation)
             self._current_continuation = continuation
-            self._results['videos'].extend(results['videos'])
-            self._results['shorts'].extend(results['shorts'])
-            self._results['playlist'].extend(results['playlist'])
-            self._results['channel'].extend(results['channel'])
+            self._results["videos"].extend(results["videos"])
+            self._results["shorts"].extend(results["shorts"])
+            self._results["playlist"].extend(results["playlist"])
+            self._results["channel"].extend(results["channel"])
         else:
             raise IndexError
 
@@ -185,23 +188,26 @@ class Search:
 
         # Initial result is handled by try block, continuations by except block
         try:
-            sections = raw_results['contents']['twoColumnSearchResultsRenderer'][
-                'primaryContents']['sectionListRenderer']['contents']
+            sections = raw_results["contents"]["twoColumnSearchResultsRenderer"][
+                "primaryContents"
+            ]["sectionListRenderer"]["contents"]
         except KeyError:
-            sections = raw_results['onResponseReceivedCommands'][0][
-                'appendContinuationItemsAction']['continuationItems']
+            sections = raw_results["onResponseReceivedCommands"][0][
+                "appendContinuationItemsAction"
+            ]["continuationItems"]
         item_renderer = None
         continuation_renderer = None
         for s in sections:
-            if 'itemSectionRenderer' in s:
-                item_renderer = s['itemSectionRenderer']
-            if 'continuationItemRenderer' in s:
-                continuation_renderer = s['continuationItemRenderer']
+            if "itemSectionRenderer" in s:
+                item_renderer = s["itemSectionRenderer"]
+            if "continuationItemRenderer" in s:
+                continuation_renderer = s["continuationItemRenderer"]
 
         # If the continuationItemRenderer doesn't exist, assume no further results
         if continuation_renderer:
-            next_continuation = continuation_renderer['continuationEndpoint'][
-                'continuationCommand']['token']
+            next_continuation = continuation_renderer["continuationEndpoint"][
+                "continuationCommand"
+            ]["token"]
         else:
             next_continuation = None
 
@@ -212,58 +218,74 @@ class Search:
             shorts = []
             playlist = []
             channel = []
-            raw_video_list = item_renderer['contents']
+            raw_video_list = item_renderer["contents"]
             for video_details in raw_video_list:
                 # Skip over ads
-                if video_details.get('searchPyvRenderer', {}).get('ads', None):
+                if video_details.get("searchPyvRenderer", {}).get("ads", None):
                     continue
 
                 # Skip "recommended" type videos e.g. "people also watched" and "popular X"
                 #  that break up the search results
-                if 'shelfRenderer' in video_details:
+                if "shelfRenderer" in video_details:
                     continue
 
                 # Skip auto-generated "mix" playlist results
-                if 'radioRenderer' in video_details:
+                if "radioRenderer" in video_details:
                     continue
 
                 # Skip 'people also searched for' results
-                if 'horizontalCardListRenderer' in video_details:
+                if "horizontalCardListRenderer" in video_details:
                     continue
 
                 # Can't seem to reproduce, probably related to typo fix suggestions
-                if 'didYouMeanRenderer' in video_details:
+                if "didYouMeanRenderer" in video_details:
                     continue
 
                 # Seems to be the renderer used for the image shown on a no results page
-                if 'backgroundPromoRenderer' in video_details:
+                if "backgroundPromoRenderer" in video_details:
                     continue
 
                 # Get playlist results
-                if 'playlistRenderer' in video_details:
-                    playlist.append(Playlist(f"https://www.youtube.com/playlist?list="
-                                             f"{video_details['playlistRenderer']['playlistId']}"))
+                if "playlistRenderer" in video_details:
+                    playlist.append(
+                        Playlist(
+                            f"https://www.youtube.com/playlist?list="
+                            f"{video_details['playlistRenderer']['playlistId']}"
+                        )
+                    )
 
                 # Get channel results
-                if 'channelRenderer' in video_details:
-                    channel.append(Channel(f"https://www.youtube.com/channel/"
-                                           f"{video_details['channelRenderer']['channelId']}"))
+                if "channelRenderer" in video_details:
+                    channel.append(
+                        Channel(
+                            f"https://www.youtube.com/channel/"
+                            f"{video_details['channelRenderer']['channelId']}"
+                        )
+                    )
 
                 # Get shorts results
-                if 'reelShelfRenderer' in video_details:
-                    for items in video_details['reelShelfRenderer']['items']:
-                        shorts.append(YouTube(f"https://www.youtube.com/watch?v="
-                                              f"{items['reelItemRenderer']['videoId']}"))
+                if "reelShelfRenderer" in video_details:
+                    for items in video_details["reelShelfRenderer"]["items"]:
+                        shorts.append(
+                            YouTube(
+                                f"https://www.youtube.com/watch?v="
+                                f"{items['reelItemRenderer']['videoId']}"
+                            )
+                        )
 
                 # Get videos results
-                if 'videoRenderer' in video_details:
-                    videos.append(YouTube(f"https://www.youtube.com/watch?v="
-                                          f"{video_details['videoRenderer']['videoId']}"))
+                if "videoRenderer" in video_details:
+                    videos.append(
+                        YouTube(
+                            f"https://www.youtube.com/watch?v="
+                            f"{video_details['videoRenderer']['videoId']}"
+                        )
+                    )
 
-            results['videos'] = videos
-            results['shorts'] = shorts
-            results['playlist'] = playlist
-            results['channel'] = channel
+            results["videos"] = videos
+            results["shorts"] = shorts
+            results["playlist"] = playlist
+            results["channel"] = channel
 
         return results, next_continuation
 

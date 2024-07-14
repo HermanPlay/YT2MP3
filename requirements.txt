@@ -1,3 +1,4 @@
 pydantic==1.10.7
 python-telegram-bot==13.13
 pymongo==4.4.0
+pre-commit==3.7.1
