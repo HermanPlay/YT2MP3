@@ -1,8 +1,9 @@
-from pytubefix import YouTube
+import logging
 import os
 import time
+
 from config.exceptions import FileTooLarge
-import logging
+from pytubefix import YouTube
 
 _logger = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ def fix(title: str) -> None:
 
     # convert mp3 to wav
     os.system(
-        f"ffmpeg -loglevel quiet -analyzeduration 2147483647 -probesize 2147483647 -i {src} {dst}"
+        f"ffmpeg -loglevel quiet -analyzeduration 2147483647 -probesize 2147483647 -i {src} {dst}"  # noqa E501
     )
 
     os.remove(src)
@@ -40,7 +41,7 @@ def fix(title: str) -> None:
     dst = title + ".mp3"
     # convert wav to mp3
     os.system(
-        f"ffmpeg -loglevel quiet -analyzeduration 2147483647 -probesize 2147483647 -i {src} {dst}"
+        f"ffmpeg -loglevel quiet -analyzeduration 2147483647 -probesize 2147483647 -i {src} {dst}"  # noqa E501
     )
 
     os.remove(f"{title}.wav")

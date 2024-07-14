@@ -6,18 +6,21 @@ combined). This was referred to as ``Video`` in the legacy pytube version, but
 has been renamed to accommodate DASH (which serves the audio and video
 separately).
 """
-
 import logging
 import os
-from math import ceil
-
 from datetime import datetime
-from typing import BinaryIO, Dict, Optional, Tuple
+from math import ceil
+from typing import BinaryIO
+from typing import Dict
+from typing import Optional
+from typing import Tuple
 from urllib.error import HTTPError
 from urllib.parse import parse_qs
 
-from pytubefix import extract, request
-from pytubefix.helpers import safe_filename, target_directory
+from pytubefix import extract
+from pytubefix import request
+from pytubefix.helpers import safe_filename
+from pytubefix.helpers import target_directory
 from pytubefix.itags import get_format_profile
 from pytubefix.monostate import Monostate
 
@@ -27,9 +30,7 @@ logger = logging.getLogger(__name__)
 class Stream:
     """Container for stream manifest data."""
 
-    def __init__(
-        self, stream: Dict, monostate: Monostate
-    ):
+    def __init__(self, stream: Dict, monostate: Monostate):
         """Construct a :class:`Stream <Stream>`.
 
         :param dict stream:
@@ -43,9 +44,7 @@ class Stream:
         self._monostate = monostate
 
         self.url = stream["url"]  # signed download url
-        self.itag = int(
-            stream["itag"]
-        )  # stream format id (youtube nomenclature)
+        self.itag = int(stream["itag"])  # stream format id (youtube nomenclature)
 
         # set type and codec info
 
@@ -63,37 +62,46 @@ class Stream:
         self.bitrate: Optional[int] = stream["bitrate"]
 
         # filesize in bytes
-        self._filesize: Optional[int] = int(stream.get('contentLength', 0))
-        
+        self._filesize: Optional[int] = int(stream.get("contentLength", 0))
+
         # filesize in kilobytes
-        self._filesize_kb: Optional[float] = float(ceil(float(stream.get('contentLength', 0)) / 1024 * 1000) / 1000)
-        
+        self._filesize_kb: Optional[float] = float(
+            ceil(float(stream.get("contentLength", 0)) / 1024 * 1000) / 1000
+        )
+
         # filesize in megabytes
-        self._filesize_mb: Optional[float] = float(ceil(float(stream.get('contentLength', 0)) / 1024 / 1024 * 1000) / 1000)
-        
+        self._filesize_mb: Optional[float] = float(
+            ceil(float(stream.get("contentLength", 0)) / 1024 / 1024 * 1000) / 1000
+        )
+
         # filesize in gigabytes(fingers crossed we don't need terabytes going forward though)
-        self._filesize_gb: Optional[float] = float(ceil(float(stream.get('contentLength', 0)) / 1024 / 1024 / 1024 * 1000) / 1000)
+        self._filesize_gb: Optional[float] = float(
+            ceil(float(stream.get("contentLength", 0)) / 1024 / 1024 / 1024 * 1000)
+            / 1000
+        )
 
         # Additional information about the stream format, such as resolution,
         # frame rate, and whether the stream is live (HLS) or 3D.
         itag_profile = get_format_profile(self.itag)
         self.is_dash = itag_profile["is_dash"]
         self.abr = itag_profile["abr"]  # average bitrate (audio streams only)
-        if 'fps' in stream:
-            self.fps = stream['fps']  # Video streams only
-        self.resolution = itag_profile[
-            "resolution"
-        ]  # resolution (e.g.: "480p")
+        if "fps" in stream:
+            self.fps = stream["fps"]  # Video streams only
+        self.resolution = itag_profile["resolution"]  # resolution (e.g.: "480p")
         self.is_3d = itag_profile["is_3d"]
         self.is_hdr = itag_profile["is_hdr"]
         self.is_live = itag_profile["is_live"]
 
-        self.includes_multiple_audio_tracks: bool = 'audioTrack' in stream
+        self.includes_multiple_audio_tracks: bool = "audioTrack" in stream
         if self.includes_multiple_audio_tracks:
-            self.is_default_audio_track = stream['audioTrack']['audioIsDefault']
-            self.audio_track_name = str(stream['audioTrack']['displayName']).split(" ")[0]
+            self.is_default_audio_track = stream["audioTrack"]["audioIsDefault"]
+            self.audio_track_name = str(stream["audioTrack"]["displayName"]).split(" ")[
+                0
+            ]
         else:
-            self.is_default_audio_track = self.includes_audio_track and not self.includes_video_track
+            self.is_default_audio_track = (
+                self.includes_audio_track and not self.includes_video_track
+            )
             self.audio_track_name = None
 
     @property
@@ -169,7 +177,7 @@ class Stream:
                     raise
                 self._filesize = request.seq_filesize(self.url)
         return self._filesize
-    
+
     @property
     def filesize_kb(self) -> float:
         """File size of the media stream in kilobytes.
@@ -180,13 +188,17 @@ class Stream:
         """
         if self._filesize_kb == 0:
             try:
-                self._filesize_kb = float(ceil(request.filesize(self.url)/1024 * 1000) / 1000)
+                self._filesize_kb = float(
+                    ceil(request.filesize(self.url) / 1024 * 1000) / 1000
+                )
             except HTTPError as e:
                 if e.code != 404:
                     raise
-                self._filesize_kb = float(ceil(request.seq_filesize(self.url)/1024 * 1000) / 1000)
+                self._filesize_kb = float(
+                    ceil(request.seq_filesize(self.url) / 1024 * 1000) / 1000
+                )
         return self._filesize_kb
-    
+
     @property
     def filesize_mb(self) -> float:
         """File size of the media stream in megabytes.
@@ -197,11 +209,15 @@ class Stream:
         """
         if self._filesize_mb == 0:
             try:
-                self._filesize_mb = float(ceil(request.filesize(self.url)/1024/1024 * 1000) / 1000)
+                self._filesize_mb = float(
+                    ceil(request.filesize(self.url) / 1024 / 1024 * 1000) / 1000
+                )
             except HTTPError as e:
                 if e.code != 404:
                     raise
-                self._filesize_mb = float(ceil(request.seq_filesize(self.url)/1024/1024 * 1000) / 1000)
+                self._filesize_mb = float(
+                    ceil(request.seq_filesize(self.url) / 1024 / 1024 * 1000) / 1000
+                )
         return self._filesize_mb
 
     @property
@@ -214,15 +230,22 @@ class Stream:
         """
         if self._filesize_gb == 0:
             try:
-                self._filesize_gb = float(ceil(request.filesize(self.url)/1024/1024/1024 * 1000) / 1000)
+                self._filesize_gb = float(
+                    ceil(request.filesize(self.url) / 1024 / 1024 / 1024 * 1000) / 1000
+                )
             except HTTPError as e:
                 if e.code != 404:
                     raise
-                self._filesize_gb = float(ceil(request.seq_filesize(self.url)/1024/1024/1024 * 1000) / 1000)
+                self._filesize_gb = float(
+                    ceil(request.seq_filesize(self.url) / 1024 / 1024 / 1024 * 1000)
+                    / 1000
+                )
         return self._filesize_gb
-    
+
     @property
-    def title(self,) -> str:
+    def title(
+        self,
+    ) -> str:
         """Get title of video
 
         :rtype: str
@@ -242,9 +265,7 @@ class Stream:
         """
         if self._monostate.duration and self.bitrate:
             bits_in_byte = 8
-            return int(
-                (self._monostate.duration * self.bitrate) / bits_in_byte
-            )
+            return int((self._monostate.duration * self.bitrate) / bits_in_byte)
 
         return self.filesize
 
@@ -264,16 +285,16 @@ class Stream:
         filename = safe_filename(self.title)
         return f"{filename}.{self.subtype}"
 
-
-    def download(self,
-                output_path: Optional[str] = None,
-                filename: Optional[str] = None,
-                filename_prefix: Optional[str] = None,
-                skip_existing: bool = True,
-                timeout: Optional[int] = None,
-                max_retries: Optional[int] = 0,
-                mp3: bool = False) -> str:
-        
+    def download(
+        self,
+        output_path: Optional[str] = None,
+        filename: Optional[str] = None,
+        filename_prefix: Optional[str] = None,
+        skip_existing: bool = True,
+        timeout: Optional[int] = None,
+        max_retries: Optional[int] = 0,
+        mp3: bool = False,
+    ) -> str:
         """
         Download the file from the URL provided by `self.url`.
 
@@ -299,7 +320,7 @@ class Stream:
             The progress of the download is tracked using the `on_progress` callback.
             The `on_complete` callback is triggered after the download is completed.
         """
-        
+
         if mp3:
             if filename is None:
                 filename = self.title + ".mp3"
@@ -313,19 +334,17 @@ class Stream:
         )
 
         if skip_existing and self.exists_at_path(file_path):
-            logger.debug(f'file {file_path} already exists, skipping')
+            logger.debug(f"file {file_path} already exists, skipping")
             self.on_complete(file_path)
             return file_path
 
         bytes_remaining = self.filesize
-        logger.debug(f'downloading ({self.filesize} total bytes) file to {file_path}')
+        logger.debug(f"downloading ({self.filesize} total bytes) file to {file_path}")
 
         with open(file_path, "wb") as fh:
             try:
                 for chunk in request.stream(
-                    self.url,
-                    timeout=timeout,
-                    max_retries=max_retries
+                    self.url, timeout=timeout, max_retries=max_retries
                 ):
                     # reduce the (bytes) remainder by the length of the chunk.
                     bytes_remaining -= len(chunk)
@@ -337,9 +356,7 @@ class Stream:
             except StopIteration:
                 # Some adaptive streams need to be requested with sequence numbers
                 for chunk in request.seq_stream(
-                    self.url,
-                    timeout=timeout,
-                    max_retries=max_retries
+                    self.url, timeout=timeout, max_retries=max_retries
                 ):
                     # reduce the (bytes) remainder by the length of the chunk.
                     bytes_remaining -= len(chunk)
@@ -362,10 +379,7 @@ class Stream:
         return os.path.join(target_directory(output_path), filename)
 
     def exists_at_path(self, file_path: str) -> bool:
-        return (
-            os.path.isfile(file_path)
-            and os.path.getsize(file_path) == self.filesize
-        )
+        return os.path.isfile(file_path) and os.path.getsize(file_path) == self.filesize
 
     def stream_to_buffer(self, buffer: BinaryIO) -> None:
         """Write the media stream to buffer
@@ -374,7 +388,8 @@ class Stream:
         """
         bytes_remaining = self.filesize
         logger.info(
-            "downloading (%s total bytes) file to buffer", self.filesize,
+            "downloading (%s total bytes) file to buffer",
+            self.filesize,
         )
 
         for chunk in request.stream(self.url):
@@ -384,9 +399,7 @@ class Stream:
             self.on_progress(chunk, buffer, bytes_remaining)
         self.on_complete(None)
 
-    def on_progress(
-        self, chunk: bytes, file_handler: BinaryIO, bytes_remaining: int
-    ):
+    def on_progress(self, chunk: bytes, file_handler: BinaryIO, bytes_remaining: int):
         """On progress callback function.
 
         This function writes the binary data to the file, then checks if an
@@ -441,7 +454,10 @@ class Stream:
             parts.extend(['res="{s.resolution}"', 'fps="{s.fps}fps"'])
             if not self.is_adaptive:
                 parts.extend(
-                    ['vcodec="{s.video_codec}"', 'acodec="{s.audio_codec}"',]
+                    [
+                        'vcodec="{s.video_codec}"',
+                        'acodec="{s.audio_codec}"',
+                    ]
                 )
             else:
                 parts.extend(['vcodec="{s.video_codec}"'])

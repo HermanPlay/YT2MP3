@@ -1,9 +1,9 @@
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
 import logging
 
-from config.exceptions import AlreadyExistsError, UserNotFoundError
-from config.config import settings
+from config.config import cfg
+from config.exceptions import UserNotFoundError
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 from schemas.user import User
 
 logger = logging.getLogger(__name__)
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class ClientDB:
     def __init__(self) -> None:
-        self.client = MongoClient(settings.DB_URI, server_api=ServerApi("1"))
+        self.client = MongoClient(cfg.DB_URI, server_api=ServerApi("1"))
         self.db_name = "yt2mp3"
         self.user_collection = "users"
         self.music_collection = "music"

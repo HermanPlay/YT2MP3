@@ -1,8 +1,13 @@
 """This module provides a query interface for media streams and captions."""
-from collections.abc import Mapping, Sequence
-from typing import Callable, List, Optional, Union
+from collections.abc import Mapping
+from collections.abc import Sequence
+from typing import Callable
+from typing import List
+from typing import Optional
+from typing import Union
 
-from pytubefix import Caption, Stream
+from pytubefix import Caption
+from pytubefix import Stream
 from pytubefix.helpers import deprecated
 
 
@@ -157,16 +162,12 @@ class StreamQuery(Sequence):
 
         if only_audio:
             filters.append(
-                lambda s: (
-                    s.includes_audio_track and not s.includes_video_track
-                ),
+                lambda s: (s.includes_audio_track and not s.includes_video_track),
             )
 
         if only_video:
             filters.append(
-                lambda s: (
-                    s.includes_video_track and not s.includes_audio_track
-                ),
+                lambda s: (s.includes_video_track and not s.includes_audio_track),
             )
 
         if progressive:
@@ -199,14 +200,10 @@ class StreamQuery(Sequence):
             The name of the attribute to sort by.
         """
         has_attribute = [
-            s
-            for s in self.fmt_streams
-            if getattr(s, attribute_name) is not None
+            s for s in self.fmt_streams if getattr(s, attribute_name) is not None
         ]
         # Check that the attributes have string values.
-        if has_attribute and isinstance(
-            getattr(has_attribute[0], attribute_name), str
-        ):
+        if has_attribute and isinstance(getattr(has_attribute[0], attribute_name), str):
             # Try to return a StreamQuery sorted by the integer representations
             # of the values.
             try:
@@ -214,9 +211,7 @@ class StreamQuery(Sequence):
                     sorted(
                         has_attribute,
                         key=lambda s: int(
-                            "".join(
-                                filter(str.isdigit, getattr(s, attribute_name))
-                            )
+                            "".join(filter(str.isdigit, getattr(s, attribute_name)))
                         ),  # type: ignore  # noqa: E501
                     )
                 )
@@ -288,10 +283,13 @@ class StreamQuery(Sequence):
         :rtype: :class:`StreamQuery <StreamQuery>` or None
         :returns: A StreamQuery object with filtering only the dubbing streams.
         """
-        return self._filter([lambda s:
-                             not s.is_default_audio_track
-                             and s.includes_audio_track
-                             and not s.includes_video_track])
+        return self._filter(
+            [
+                lambda s: not s.is_default_audio_track
+                and s.includes_audio_track
+                and not s.includes_video_track
+            ]
+        )
 
     def get_extra_audio_track_by_name(self, name) -> Optional["StreamQuery"]:
         """Filter dubbed audio streams by name
@@ -311,9 +309,7 @@ class StreamQuery(Sequence):
 
         """
         return (
-            self.filter(progressive=True, subtype="mp4")
-            .order_by("resolution")
-            .first()
+            self.filter(progressive=True, subtype="mp4").order_by("resolution").first()
         )
 
     def get_highest_resolution(self) -> Optional[Stream]:
@@ -337,11 +333,7 @@ class StreamQuery(Sequence):
             The :class:`Stream <Stream>` matching the given itag or None if
             not found.
         """
-        return (
-            self.filter(only_audio=True, subtype=subtype)
-            .order_by("abr")
-            .last()
-        )
+        return self.filter(only_audio=True, subtype=subtype).order_by("abr").last()
 
     def otf(self, is_otf: bool = False) -> "StreamQuery":
         """Filter stream by OTF, useful if some streams have 404 URLs
@@ -381,7 +373,7 @@ class StreamQuery(Sequence):
             pass
 
     @deprecated("Get the size of this list directly using len()")
-    def count(self, value: Optional[str] = None) -> int:    # pragma: no cover
+    def count(self, value: Optional[str] = None) -> int:  # pragma: no cover
         """Get the count of items in the list.
 
         :rtype: int
@@ -419,9 +411,7 @@ class CaptionQuery(Mapping):
         """
         self.lang_code_index = {c.code: c for c in captions}
 
-    @deprecated(
-        "This object can be treated as a dictionary, i.e. captions['en']"
-    )
+    @deprecated("This object can be treated as a dictionary, i.e. captions['en']")
     def get_by_language_code(
         self, lang_code: str
     ) -> Optional[Caption]:  # pragma: no cover
