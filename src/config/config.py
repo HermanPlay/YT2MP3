@@ -8,6 +8,7 @@ from pydantic_settings import SettingsConfigDict
 # Takes valus from environmental variables, or assigned ones.
 class Config(BaseSettings):
     model_config = SettingsConfigDict(env_file="../.env", env_file_encoding="utf-8")
+    PORT: int = 5000
     TOKEN: str
     POLLING: bool = False
     WEBHOOK_URL: Optional[str] = None
