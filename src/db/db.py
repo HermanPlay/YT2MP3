@@ -49,15 +49,3 @@ class ClientDB:
         self.client[self.db_name][self.user_collection].update_one(
             {"user_id": user_id}, {"$set": {"active": False}}
         )
-
-
-if __name__ == "__main__":
-    db = ClientDB()
-    user1 = User(
-        username="test",
-        user_id=12313,
-        first_name="test",
-        language_code="en",
-    )
-    db.add_user(user1)
-    print(db.get_user(1))

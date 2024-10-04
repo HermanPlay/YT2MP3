@@ -1,33 +1,30 @@
-from typing import Any
-from typing import Dict
 from typing import Optional
 
-from pydantic import BaseSettings
-from pydantic import validator
+from pydantic import model_validator
+from pydantic_settings import BaseSettings
+from pydantic_settings import SettingsConfigDict
 
 
 # Takes valus from environmental variables, or assigned ones.
 class Config(BaseSettings):
+    model_config = SettingsConfigDict(env_file="../.env", env_file_encoding="utf-8")
     TOKEN: str
     POLLING: bool = False
-    webhook_url: Optional[str] = None
+    WEBHOOK_URL: Optional[str] = None
     ADMIN_ID: int = 0
     DB_PASSWORD: str
     DB_URI: Optional[str] = None
     SUPPORT_LINK: str = "@yt_mp3_support_bot"
     DEBUG: bool = False
 
-    @validator("webhook_url", pre=True)
-    def assemble_webhook_url(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
-        if isinstance(v, str):
-            return v
-        return "https://yt2mp3-bot.herokuapp.com/" + values.get("TOKEN")
-
-    @validator("DB_URI", pre=True)
-    def assemble_db_uri(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
-        if isinstance(v, cls):
-            return v
-        return f"mongodb+srv://backend:{values.get('DB_PASSWORD')}@yt2mp3.3vaqogo.mongodb.net/?retryWrites=true&w=majority"
+    @model_validator(mode="before")
+    @classmethod
+    def assemble_db_uri(cls, data):
+        if isinstance(data, dict):
+            data[
+                "DB_URI"
+            ] = f"mongodb+srv://backend:{data.get('DB_PASSWORD')}@yt2mp3.3vaqogo.mongodb.net/?retryWrites=true&w=majority"
+        return data
 
 
 cfg = Config()
