@@ -44,8 +44,10 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 chat_id=update.effective_chat.id,
                 audio=audio,
                 filename=f"{download_result.title}.mp3",
+                title={download_result.title},
                 caption=locales.US_SUCCESSFUL_DOWNLOAD_TEXT,
                 parse_mode=ParseMode.HTML,
+                write_timeout=100,
             )
         os.remove(f"{title}.mp3")
         await msg.delete()
