@@ -1,11 +1,13 @@
-import logging
 import os
 import time
 
 from config.exceptions import FileTooLarge
+from pydantic import BaseModel
 from pytubefix import YouTube
+from utils import get_logger
 
-_logger = logging.getLogger(__name__)
+
+_logger = get_logger(__name__)
 
 
 def str_to_ascii(s: str) -> str:
@@ -19,7 +21,7 @@ def str_to_ascii(s: str) -> str:
     return "".join(i if ord(i) < 128 else " " for i in s)
 
 
-def fix(title: str) -> None:
+def _fix(title: str) -> None:
     """
     Function takes file name and fixes its metadata,
     by converting to wav and back to mp3
@@ -47,8 +49,14 @@ def fix(title: str) -> None:
     os.remove(f"{title}.wav")
 
 
+class DownloadResult(BaseModel):
+    file_name: str
+    file_path: str
+    title: str
+
+
 # url input from user
-def download(url: str) -> str:
+def download(url: str) -> DownloadResult:
     """
     Function takes url and downloades video.
     It also calls fix function before return.
@@ -59,6 +67,7 @@ def download(url: str) -> str:
     :raises: FileTooLarge if file exceeds telegram max upload file size
     """
 
+    _logger.debug(f"Downloading video from {url}")
     yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
     ys = yt.streams.get_audio_only()
     orig_title = yt.title
@@ -68,18 +77,25 @@ def download(url: str) -> str:
 
     orig_title = str_to_ascii(orig_title)
     orig_title = orig_title.replace("/", "")
-    title = str(int(time.time()))
+    file_name = str(int(time.time()))
 
-    out_file = ys.download(mp3=True, filename=title)
+    out_file = ys.download(mp3=True, filename=file_name)
+    _logger.debug(f"Downloaded video to {out_file}")
+    result = DownloadResult(file_name=file_name, file_path=out_file, title=orig_title)
+    return result
+
+
+def fix_metadata(file_name: str, file_path: str) -> str:
     try:
-        fix(title)
+        _logger.debug(f"Converting {file_path} to wav and mp3")
+        _fix(file_name)
     except Exception as e:
-        print(f"Failed converting to wav and mp3 | {e}")
+        _logger.error(f"Failed converting to wav and mp3 | {e}")
+        os.remove(file_path)
+        raise e
 
-    os.rename(out_file, orig_title + ".mp3")
-
-    file_size = os.path.getsize(orig_title + ".mp3")
+    file_size = os.path.getsize(file_path)
     max_file_size = 50 * 1000 * 1000  # 50 MB
     if file_size > max_file_size:
         raise FileTooLarge("The file is too large to send via telegaram bot")
-    return orig_title
+    return file_name

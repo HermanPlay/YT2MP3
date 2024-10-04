@@ -1,18 +1,27 @@
 """This module contains all non-cipher related data extraction logic."""
-
 import logging
-import urllib.parse
 import re
+import urllib.parse
 from collections import OrderedDict
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
-from urllib.parse import parse_qs, quote, urlencode, urlparse
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+from urllib.parse import parse_qs
+from urllib.parse import quote
+from urllib.parse import urlencode
+from urllib.parse import urlparse
 
 from pytubefix.cipher import Cipher
-from pytubefix.exceptions import HTMLParseError, LiveStreamError, RegexMatchError
+from pytubefix.exceptions import HTMLParseError
+from pytubefix.exceptions import LiveStreamError
+from pytubefix.exceptions import RegexMatchError
 from pytubefix.helpers import regex_search
 from pytubefix.metadata import YouTubeMetadata
-from pytubefix.parser import parse_for_object, parse_for_all_objects
+from pytubefix.parser import parse_for_all_objects
+from pytubefix.parser import parse_for_object
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +97,7 @@ def is_age_restricted(watch_html: str) -> bool:
     return True
 
 
-def playability_status(watch_html: str) -> Tuple[Any, Any]:
+def playability_status(player_response: dict) -> Tuple[Any, Any]:
     """Return the playability status and status explanation of a video.
 
     For example, a video may have a status of LOGIN_REQUIRED, and an explanation
@@ -96,16 +105,20 @@ def playability_status(watch_html: str) -> Tuple[Any, Any]:
 
     This explanation is what gets incorporated into the media player overlay.
 
-    :param str watch_html:
-        The html contents of the watch page.
+    :param str player_response:
+        Content of the player's response.
     :rtype: bool
     :returns:
         Playability status and reason of the video.
     """
-    player_response = initial_player_response(watch_html)
     status_dict = player_response.get("playabilityStatus", {})
-    if "liveStreamability" in status_dict:
-        return "LIVE_STREAM", "Video is a live stream."
+    # if 'liveStreamability' in status_dict:
+    # We used liveStreamability to know if the video was live,
+    # however some clients still return this parameter even if the video is already available
+    if "videoDetails" in player_response:  # Private videos do not contain videoDetails
+        if "isLive" in player_response["videoDetails"]:
+            return "LIVE_STREAM", "Video is a live stream."
+
     if "status" in status_dict:
         if "reason" in status_dict:
             return status_dict["status"], [status_dict["reason"]]
@@ -390,17 +403,54 @@ def get_ytcfg(html: str) -> str:
     raise RegexMatchError(caller="get_ytcfg", pattern="ytcfg_pattenrs")
 
 
-def apply_signature(stream_manifest: Dict, vid_info: Dict, js: str) -> None:
+def apply_po_token(stream_manifest: Dict, vid_info: Dict, po_token: str) -> None:
+    """Apply the proof of origin token to the stream manifest
+
+    :param dict stream_manifest:
+        Details of the media streams available.
+    :param str po_token:
+        Proof of Origin Token.
+    """
+    for i, stream in enumerate(stream_manifest):
+        try:
+            url: str = stream["url"]
+        except KeyError:
+            live_stream = vid_info.get(
+                "playabilityStatus",
+                {},
+            ).get("liveStreamability")
+            if live_stream:
+                raise LiveStreamError("UNKNOWN")
+
+        parsed_url = urlparse(url)
+
+        # Convert query params off url to dict
+        query_params = parse_qs(urlparse(url).query)
+        query_params = {k: v[0] for k, v in query_params.items()}
+
+        logger.debug(f'Applying po_token to itag={stream["itag"]}')
+        query_params["pot"] = po_token
+
+        url = f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}?{urlencode(query_params)}"
+
+        stream_manifest[i]["url"] = url
+
+
+def apply_signature(
+    stream_manifest: Dict, vid_info: Dict, js: str, url_js: str
+) -> None:
     """Apply the decrypted signature to the stream manifest.
 
     :param dict stream_manifest:
         Details of the media streams available.
     :param str js:
         The contents of the base.js asset file.
+    :param str url_js:
+        Full base.js url
 
     """
-    cipher = Cipher(js=js)
-
+    cipher = Cipher(js=js, js_url=url_js)
+    discovered_n = dict()
     for i, stream in enumerate(stream_manifest):
         try:
             url: str = stream["url"]
@@ -439,15 +489,24 @@ def apply_signature(stream_manifest: Dict, vid_info: Dict, js: str) -> None:
             # To decipher the value of "n", we must interpret the player's JavaScript.
 
             initial_n = query_params["n"]
-            new_n = cipher.get_throttling(initial_n)
+            logger.debug(f"Parameter n is: {initial_n}")
+
+            # Check if any previous stream decrypted the parameter
+            if initial_n not in discovered_n:
+                discovered_n[initial_n] = cipher.get_throttling(initial_n)
+            else:
+                logger.debug("Parameter n found skipping decryption")
+
+            new_n = discovered_n[initial_n]
             query_params["n"] = new_n
+            logger.debug(f"Parameter n deciphered: {new_n}")
 
         url = f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}?{urlencode(query_params)}"  # noqa:E501
 
         stream_manifest[i]["url"] = url
 
 
-def apply_descrambler(stream_data: Dict) -> None:
+def apply_descrambler(stream_data: Dict) -> Optional[List[Dict]]:
     """Apply various in-place transforms to YouTube's media stream data.
 
     Creates a ``list`` of dictionaries by string splitting on commas, then
@@ -469,7 +528,7 @@ def apply_descrambler(stream_data: Dict) -> None:
         return None
 
     # Merge formats and adaptiveFormats into a single list
-    formats = []
+    formats: list[Dict] = []
     if "formats" in stream_data.keys():
         formats.extend(stream_data["formats"])
     if "adaptiveFormats" in stream_data.keys():

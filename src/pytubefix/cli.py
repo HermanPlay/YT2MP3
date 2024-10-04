@@ -41,7 +41,7 @@ def main():
     if args.verbose:
         log_filename = args.logfile or None
         setup_logger(logging.DEBUG, log_filename=log_filename)
-        logger.debug(f"Pytube version: {__version__}")
+        logger.debug(f"Pytubefix version: {__version__}")
 
     if not args.url or "youtu" not in args.url:
         parser.print_help()
@@ -118,7 +118,7 @@ def _parse_args(
         "--list",
         action="store_true",
         help=(
-            "The list option causes pytube cli to return a list of streams "
+            "The list option causes pytubefix cli to return a list of streams "
             "available to download"
         ),
     )
@@ -377,12 +377,14 @@ def _ffmpeg_downloader(audio_stream: Stream, video_stream: Stream, target: str) 
         "audio",
         target=target,
     )
-    _download(stream=video_stream, target=target, filename=video_unique_name)
+    video_filename = f"{video_unique_name}.{video_stream.subtype}"
+    _download(stream=video_stream, target=target, filename=video_filename)
     print("Loading audio...")
-    _download(stream=audio_stream, target=target, filename=audio_unique_name)
+    audio_filename = f"{audio_unique_name}.{audio_stream.subtype}"
+    _download(stream=audio_stream, target=target, filename=audio_filename)
 
-    video_path = os.path.join(target, f"{video_unique_name}.{video_stream.subtype}")
-    audio_path = os.path.join(target, f"{audio_unique_name}.{audio_stream.subtype}")
+    video_path = os.path.join(target, video_filename)
+    audio_path = os.path.join(target, audio_filename)
     final_path = os.path.join(
         target, f"{safe_filename(video_stream.title)}.{video_stream.subtype}"
     )

@@ -1,4 +1,3 @@
-import logging
 import os
 
 import locales
@@ -8,22 +7,21 @@ from config.exceptions import FileTooLarge
 from config.exceptions import UserNotFoundError
 from db import ClientDB
 from downloader import download
+from downloader import fix_metadata
 from schemas.user import User
 from telegram import Update
 from telegram.chataction import ChatAction
+from telegram.constants import PARSEMODE_HTML
 from telegram.ext import CallbackContext
 from telegram.ext import CommandHandler
 from telegram.ext import ConversationHandler
 from telegram.ext import Filters
 from telegram.ext import MessageHandler
 from telegram.ext import Updater
+from utils import get_logger
 
 # Enable logging
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
-
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 db = ClientDB()
 
 ATTEMPTED_LOGINS = []
@@ -89,22 +87,30 @@ def echo(update: Update, context: CallbackContext) -> None:
     :param context: Context object passed to the callback by CommandHandler
     """
     try:
-        if register_user(update.effective_user):
-            logger.info(f"New user registered: {update.effective_user.id=}")
-        msg_id = update.message.reply_text("Downloading...")
-        title = download(url=update.message.text)
-        context.bot.edit_message_text(
-            chat_id=msg_id.chat_id,
-            message_id=msg_id.message_id,
-            text="Sending audio...",
+        register_user(update.effective_user)
+
+        msg = update.message.reply_text("Downloading...")
+        download_result = download(url=update.message.text)
+        msg.delete()
+        msg = update.message.reply_text("Making adjustments...")
+        title = fix_metadata(
+            file_name=download_result.file_name, file_path=download_result.file_path
         )
+        msg.delete()
+        msg = update.message.reply_text("Sending audio...")
         with open(f"{title}.mp3", "rb") as audio:
             context.bot.send_chat_action(
                 chat_id=update.effective_chat.id, action=ChatAction.UPLOAD_VOICE
             )
-            context.bot.send_audio(chat_id=update.effective_chat.id, audio=audio)
+            context.bot.send_audio(
+                chat_id=update.effective_chat.id,
+                audio=audio,
+                filename=f"{download_result.title}.mp3",
+                caption=locales.US_SUCCESSFUL_DOWNLOAD_TEXT,
+                parse_mode=PARSEMODE_HTML,
+            )
         os.remove(f"{title}.mp3")
-        context.bot.delete_message(chat_id=msg_id.chat_id, message_id=msg_id.message_id)
+        msg.delete()
     except pytubefix.exceptions.RegexMatchError:
         context.bot.send_message(
             chat_id=update.effective_chat.id,
@@ -211,6 +217,7 @@ def main():
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
     # start_polling() is non-blocking and will stop the bot gracefully.
+    logger.info("Bot started")
     updater.idle()
 
 

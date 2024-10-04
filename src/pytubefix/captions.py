@@ -48,7 +48,10 @@ class Caption:
     @property
     def json_captions(self) -> dict:
         """Download and parse the json caption tracks."""
-        json_captions_url = self.url.replace("fmt=srv3", "fmt=json3")
+        if "ftm=" in self.url:
+            json_captions_url = self.url.replace("fmt=srv3", "fmt=json3")
+        else:
+            json_captions_url = f"{self.url}&fmt=json3"
         text = request.get(json_captions_url)
         parsed = json.loads(text)
         assert parsed["wireMagic"] == "pb3", "Unexpected captions format"
@@ -100,8 +103,8 @@ class Caption:
         root = ElementTree.fromstring(xml_captions)
 
         i = 0
-        for child in list(root.iter("body"))[0]:
-            if child.tag == "p":
+        for child in list(root.iter(root.tag))[0]:
+            if child.tag in ["p", "text"]:
                 caption = ""
 
                 # I think it will be faster than `len(list(child)) == 0`
@@ -111,14 +114,24 @@ class Caption:
                 for s in list(child):
                     if s.tag == "s":
                         caption += f" {s.text}"
+                if not caption:
+                    continue
                 caption = unescape(
                     caption.replace("\n", " ").replace("  ", " "),
                 )
                 try:
-                    duration = float(child.attrib["d"]) / 1000.0
+                    if "d" in child.attrib:
+                        duration = float(child.attrib["d"]) / 1000.0
+                    else:
+                        duration = float(child.attrib["dur"])
                 except KeyError:
                     duration = 0.0
-                start = float(child.attrib["t"]) / 1000.0
+
+                if "t" in child.attrib:
+                    start = float(child.attrib["t"]) / 1000.0
+                else:
+                    start = float(child.attrib["start"])
+
                 end = start + duration
                 sequence_number = i + 1  # convert from 0-indexed to 1.
                 line = "{seq}\n{start} --> {end}\n{text}\n".format(
