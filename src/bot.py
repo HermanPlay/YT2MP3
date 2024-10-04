@@ -132,7 +132,7 @@ def send_all(update: Update, context: CallbackContext):
 
 
 def send_all_message(update: Update, context: CallbackContext):
-    message = update.message.text
+    message = update.message.text_html
 
     users = [user.user_id for user in db.get_users()]
 
@@ -143,13 +143,12 @@ def send_all_message(update: Update, context: CallbackContext):
     for chat_id in users:
         try:
             context.bot.send_message(
-                chat_id=chat_id, text=message, parse_mode="markdown"
+                chat_id=chat_id, text=message, parse_mode=PARSEMODE_HTML
             )
             count += 1
         except Exception as e:
             logger.error('Update "%s" caused exception "%s"', update, e)
             db.disable_user(chat_id)
-    update.message.reply_text("Message has been sent to all users")
     update.message.reply_text(f"Message has been sent to {count}/{len(users)} users")
     update.message.reply_text("See logs for more details")
     return ConversationHandler.END
