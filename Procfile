@@ -1,1 +1,1 @@
-web: python src/bot.py $PORT
+web: python src/main.py $PORT
