@@ -1,5 +1,4 @@
 import os
-import traceback
 
 import locales
 import pytubefix
@@ -29,17 +28,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         register_user(update.effective_user)
 
         msg = await update.message.reply_text("Downloading...")
-        try:
-            download_result = download(url=update.message.text)
-        except Exception:
-            logger.error(traceback.format_exc())
-            await msg.delete()
-            await context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                text=locales.US_DOWNLOAD_ERROR_TEXT,
-            )
-            return
-
+        download_result = download(url=update.message.text)
         await msg.delete()
         msg = await update.message.reply_text("Making adjustments...")
         title = fix_metadata(
