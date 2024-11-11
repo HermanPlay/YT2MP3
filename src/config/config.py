@@ -16,7 +16,7 @@ class Config(BaseSettings):
     DB_PASSWORD: str
     DB_URI: Optional[str] = None
     SUPPORT_LINK: str = "@yt_mp3_support_bot"
-    DEBUG: bool = False
+    DEBUG: bool = True
 
     @model_validator(mode="before")
     @classmethod

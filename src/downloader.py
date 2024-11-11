@@ -67,8 +67,10 @@ def download(url: str) -> DownloadResult:
     :raises: FileTooLarge if file exceeds telegram max upload file size
     """
 
-    _logger.debug(f"Downloading video from {url}")
-    yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
+    _logger.info(f"Downloading video from {url=}")
+    # yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
+    yt = YouTube(url)
+
     ys = yt.streams.get_audio_only()
     orig_title = yt.title
     max_filename_length = 120
@@ -80,7 +82,7 @@ def download(url: str) -> DownloadResult:
     file_name = str(int(time.time()))
 
     out_file = ys.download(mp3=True, filename=file_name)
-    _logger.debug(f"Downloaded video to {out_file}")
+    _logger.info(f"Downloaded video to {out_file}")
     result = DownloadResult(file_name=file_name, file_path=out_file, title=orig_title)
     return result
 
