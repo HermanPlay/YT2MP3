@@ -29,7 +29,7 @@ class Application:
         self.application.add_handler(handler)
 
     def run(self):
-        if cfg.DEBUG:
+        if cfg.ENV == "DEV":
             _logger.info("Setting polling")
             self.application.run_polling()
         else:

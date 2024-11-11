@@ -69,7 +69,7 @@ def download(url: str) -> DownloadResult:
 
     _logger.info(f"Downloading video from {url=}")
     # yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
-    yt = YouTube(url)
+    yt = YouTube(url, use_po_token=True, allow_oauth_cache=True)
 
     ys = yt.streams.get_audio_only()
     orig_title = yt.title
