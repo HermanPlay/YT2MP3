@@ -1,7 +1,6 @@
 import os
 
 import locales
-import pytubefix
 from config.exceptions import FileTooLarge
 from downloader import download
 from downloader import fix_metadata
@@ -51,11 +50,6 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             )
         os.remove(f"{title}.mp3")
         await msg.delete()
-    except pytubefix.exceptions.RegexMatchError:
-        await context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text="Invalid link! Try again",
-        )
     except FileTooLarge:
         await context.bot.send_message(
             chat_id=update.effective_chat.id, text=locales.US_TOO_LONG_VIDEO_TEXT

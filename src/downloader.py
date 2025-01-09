@@ -5,7 +5,6 @@ import yt_dlp
 
 from config.exceptions import FileTooLarge
 from pydantic import BaseModel
-from pytubefix import YouTube
 from utils import get_logger
 
 
