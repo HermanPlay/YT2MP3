@@ -88,7 +88,7 @@ def download(url: str) -> DownloadResult:
         }],
         'outtmpl': output_template,  # Output file name
         'progress_hooks': [progress_hook],  # Hook to monitor progress
-        "cookiefile": "config/cookies.txt",
+        "cookiefile": "src/config/cookies.txt",
     }
 
     try:
