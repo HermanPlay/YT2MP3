@@ -17,14 +17,15 @@ class Config(BaseSettings):
     DB_URI: Optional[str] = None
     SUPPORT_LINK: str = "@yt_mp3_support_bot"
     ENV: str = "DEV"
+    COOKIE_PATH: str = "src/config/cookies.txt"
 
     @model_validator(mode="before")
     @classmethod
     def assemble_db_uri(cls, data):
         if isinstance(data, dict):
-            data[
-                "DB_URI"
-            ] = f"mongodb+srv://backend:{data.get('DB_PASSWORD')}@yt2mp3.3vaqogo.mongodb.net/?retryWrites=true&w=majority"
+            data["DB_URI"] = (
+                f"mongodb+srv://backend:{data.get('DB_PASSWORD')}@yt2mp3.3vaqogo.mongodb.net/?retryWrites=true&w=majority"
+            )
         return data
 
 

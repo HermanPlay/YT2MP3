@@ -5,6 +5,7 @@ import yt_dlp
 
 
 from config.exceptions import FileTooLarge
+from config.config import cfg
 from pydantic import BaseModel
 from utils import get_logger
 
@@ -56,6 +57,7 @@ class DownloadResult(BaseModel):
     file_path: str
     title: str
 
+
 def download(url: str) -> DownloadResult:
     """
     Function takes a URL and downloads the video as audio.
@@ -76,25 +78,29 @@ def download(url: str) -> DownloadResult:
 
     def progress_hook(d):
         """Check file size during download."""
-        if d['status'] == 'downloading' and d.get('total_bytes', 0) > max_file_size:
-            raise FileTooLarge(f"File exceeds Telegram's max upload size: {d['total_bytes']} bytes")
+        if d["status"] == "downloading" and d.get("total_bytes", 0) > max_file_size:
+            raise FileTooLarge(
+                f"File exceeds Telegram's max upload size: {d['total_bytes']} bytes"
+            )
 
     ydl_opts = {
-        'format': 'bestaudio/best',  # Best audio quality
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-        'outtmpl': output_template,  # Output file name
-        'progress_hooks': [progress_hook],  # Hook to monitor progress
-        "cookiefile": "src/config/cookies.txt",
+        "format": "bestaudio/best",  # Best audio quality
+        "postprocessors": [
+            {
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": "mp3",
+                "preferredquality": "192",
+            }
+        ],
+        "outtmpl": output_template,  # Output file name
+        "progress_hooks": [progress_hook],  # Hook to monitor progress
+        "cookiefile": cfg.COOKIE_PATH,
     }
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
-            orig_title = info.get('title', 'Unknown Title')
+            orig_title = info.get("title", "Unknown Title")
     except FileTooLarge as e:
         _logger.error(f"File too large: {e}")
         raise
@@ -111,8 +117,11 @@ def download(url: str) -> DownloadResult:
     out_file = Path(f"{file_name}.mp3").resolve()
     _logger.info(f"Downloaded video to {out_file}")
 
-    result = DownloadResult(file_name=file_name, file_path=str(out_file), title=orig_title)
+    result = DownloadResult(
+        file_name=file_name, file_path=str(out_file), title=orig_title
+    )
     return result
+
 
 def fix_metadata(file_name: str, file_path: str) -> str:
     try:
