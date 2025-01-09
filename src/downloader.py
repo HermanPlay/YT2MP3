@@ -3,6 +3,7 @@ from pathlib import Path
 import time
 import yt_dlp
 
+
 from config.exceptions import FileTooLarge
 from pydantic import BaseModel
 from utils import get_logger
@@ -87,6 +88,7 @@ def download(url: str) -> DownloadResult:
         }],
         'outtmpl': output_template,  # Output file name
         'progress_hooks': [progress_hook],  # Hook to monitor progress
+        "cookiefile": "config/cookies.txt",
     }
 
     try:
