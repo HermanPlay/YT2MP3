@@ -1,5 +1,7 @@
 import os
+from pathlib import Path
 import time
+import yt_dlp
 
 from config.exceptions import FileTooLarge
 from pydantic import BaseModel
@@ -54,38 +56,62 @@ class DownloadResult(BaseModel):
     file_path: str
     title: str
 
-
-# url input from user
 def download(url: str) -> DownloadResult:
     """
-    Function takes url and downloades video.
+    Function takes a URL and downloads the video as audio.
     It also calls fix function before return.
 
-    :param url: YouTube video url
+    :param url: YouTube video URL
     :return: Name of the downloaded file
 
-    :raises: FileTooLarge if file exceeds telegram max upload file size
+    :raises: FileTooLarge if file exceeds Telegram's max upload file size
     """
-
     _logger.info(f"Downloading video from {url=}")
-    # yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
-    yt = YouTube(url, use_po_token=True, allow_oauth_cache=True)
 
-    ys = yt.streams.get_audio_only()
-    orig_title = yt.title
+    # yt-dlp options
+    max_file_size = 2 * 1024 * 1024 * 1024  # 2 GB (Telegram max file size for uploads)
+    file_name = str(int(time.time()))  # Unique file name based on timestamp
+    output_template = f"{file_name}.%(ext)s"  # Output file name template
     max_filename_length = 120
+
+    def progress_hook(d):
+        """Check file size during download."""
+        if d['status'] == 'downloading' and d.get('total_bytes', 0) > max_file_size:
+            raise FileTooLarge(f"File exceeds Telegram's max upload size: {d['total_bytes']} bytes")
+
+    ydl_opts = {
+        'format': 'bestaudio/best',  # Best audio quality
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+        'outtmpl': output_template,  # Output file name
+        'progress_hooks': [progress_hook],  # Hook to monitor progress
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            orig_title = info.get('title', 'Unknown Title')
+    except FileTooLarge as e:
+        _logger.error(f"File too large: {e}")
+        raise
+    except Exception as e:
+        _logger.error(f"Error downloading video: {e}")
+        raise
+
+    # Process title
     if len(orig_title) > max_filename_length:
-        orig_title = orig_title[:120]
+        orig_title = orig_title[:max_filename_length]
+    orig_title = str_to_ascii(orig_title).replace("/", "")
 
-    orig_title = str_to_ascii(orig_title)
-    orig_title = orig_title.replace("/", "")
-    file_name = str(int(time.time()))
-
-    out_file = ys.download(mp3=True, filename=file_name)
+    # Find downloaded file path
+    out_file = Path(f"{file_name}.mp3").resolve()
     _logger.info(f"Downloaded video to {out_file}")
-    result = DownloadResult(file_name=file_name, file_path=out_file, title=orig_title)
-    return result
 
+    result = DownloadResult(file_name=file_name, file_path=str(out_file), title=orig_title)
+    return result
 
 def fix_metadata(file_name: str, file_path: str) -> str:
     try:

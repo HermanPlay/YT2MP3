@@ -1,5 +1,6 @@
-pydantic==2.6.3
+pydantic==2.10.5
 pydantic-settings==2.2.1
 python-telegram-bot[webhooks]==21.5
 pymongo==4.4.0
 pre-commit==3.7.1
+yt-dlp==2024.12.23
